@@ -19,7 +19,7 @@ class WelcomeCustomerMailable extends Mailable
 
     public function build(): self
     {
-        return $this->subject('Selamat Datang di PT Kreatif Abadi QRIS Platform')
+        return $this->subject('Selamat Datang di Qmis - PT Kreatif Sky Abadi')
             ->view('emails.welcome')
             ->with([
                 'user' => $this->user,

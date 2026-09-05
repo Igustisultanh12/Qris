@@ -2,15 +2,15 @@ import { defineStore } from 'pinia';
 import { ref } from 'vue';
 
 export const useThemeStore = defineStore('theme', () => {
-  const isDark = ref(localStorage.getItem('kreatif_theme') === 'dark');
+  const isDark = ref(localStorage.getItem('qmis_theme') === 'dark');
 
   const applyTheme = () => {
     if (isDark.value) {
       document.documentElement.classList.add('dark');
-      localStorage.setItem('kreatif_theme', 'dark');
+      localStorage.setItem('qmis_theme', 'dark');
     } else {
       document.documentElement.classList.remove('dark');
-      localStorage.setItem('kreatif_theme', 'light');
+      localStorage.setItem('qmis_theme', 'light');
     }
   };
 

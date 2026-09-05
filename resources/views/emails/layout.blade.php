@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $subject ?? 'Notifikasi PT Kreatif Abadi' }}</title>
+    <title>{{ $subject ?? 'Notifikasi Qmis - PT Kreatif Sky Abadi' }}</title>
     <style>
         body {
             margin: 0;
@@ -97,15 +97,15 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>PT Kreatif Abadi</h1>
-            <p>Platform SaaS & API Konversi QRIS Statis ke Dinamis</p>
+            <h1>Qmis</h1>
+            <p>PT Kreatif Sky Abadi &bull; Platform SaaS & API QRIS Dinamis</p>
         </div>
         <div class="content">
             @yield('content')
         </div>
         <div class="footer">
-            <p style="margin: 0 0 6px 0;"><strong>PT Kreatif Abadi</strong> &bull; Gedung Cyber Lt. 5, Jl. Kuningan Barat, Jakarta Selatan</p>
-            <p style="margin: 0;">Email otomatis dari sistem QRIS Gateway. Mohon tidak membalas email ini secara langsung.</p>
+            <p style="margin: 0 0 6px 0;"><strong>PT Kreatif Sky Abadi</strong> &bull; Gedung Cyber Lt. 5, Jl. Kuningan Barat, Jakarta Selatan</p>
+            <p style="margin: 0;">Email otomatis dari sistem Qmis Gateway. Mohon tidak membalas email ini secara langsung.</p>
         </div>
     </div>
 </body>

@@ -12,7 +12,7 @@
         </div>
 
         <h1 class="text-4xl sm:text-6xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-[1.15]">
-          Kelola QRIS Anda Lebih Mudah dengan <span class="bg-gradient-to-r from-indigo-600 via-violet-600 to-indigo-500 bg-clip-text text-transparent">Kreatif QRIS</span>
+          Kelola QRIS Anda Lebih Mudah dengan <span class="bg-gradient-to-r from-indigo-600 via-violet-600 to-indigo-500 bg-clip-text text-transparent">Qmis</span>
         </h1>
 
         <p class="mt-6 text-lg sm:text-xl text-slate-600 dark:text-slate-300 max-w-3xl mx-auto leading-relaxed">
@@ -55,7 +55,7 @@
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-6 items-center">
             <div class="font-mono text-xs text-slate-600 dark:text-slate-400 space-y-1 bg-slate-50 dark:bg-slate-950 p-4 rounded-xl">
-              <p><span class="text-indigo-500">"merchant_id"</span>: "MC-KREATIF-001",</p>
+              <p><span class="text-indigo-500">"merchant_id"</span>: "MC-QMIS-001",</p>
               <p><span class="text-indigo-500">"amount"</span>: 50000,</p>
               <p><span class="text-indigo-500">"fee"</span>: 1000,</p>
               <p><span class="text-indigo-500">"total"</span>: 51000,</p>

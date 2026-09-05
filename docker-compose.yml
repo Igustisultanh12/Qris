@@ -3,13 +3,13 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: kreatif-qris-app:latest
+    image: qmis-app:latest
     container_name: qris_app
     restart: unless-stopped
     ports:
       - "8000:80"
     environment:
-      APP_NAME: "PT Kreatif Abadi QRIS Platform"
+      APP_NAME: "Qmis - PT Kreatif Sky Abadi"
       APP_ENV: production
       APP_DEBUG: "false"
       APP_URL: "http://localhost:8000"
@@ -20,7 +20,7 @@ services:
       DB_USERNAME: qris_user
       DB_PASSWORD: qris_secret_password
       REDIS_HOST: redis
-      REDIS_PORT: 639
+      REDIS_PORT: 6379
       CACHE_STORE: redis
       QUEUE_CONNECTION: redis
       SESSION_DRIVER: redis

@@ -117,8 +117,8 @@ const loading = ref(true);
 const saving = ref(false);
 
 const form = reactive<Record<string, any>>({
-  'app.name': 'PT Kreatif Abadi QRIS Platform',
-  'app.support_email': 'support@kreatifabadi.co.id',
+  'app.name': 'Qmis',
+  'app.support_email': 'support@kreatifskyabadi.co.id',
   'qris.default_expiry_minutes': 15,
   'qris.default_fee_mode': 'charged_to_customer',
   'app.maintenance_mode': false,

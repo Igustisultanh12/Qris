@@ -33,8 +33,8 @@ class ManualTransferGateway implements PaymentGatewayInterface
             'payload' => [
                 'bank_name' => 'BCA',
                 'account_number' => '1234567890',
-                'account_name' => 'PT KREATIF ABADI',
-                'instructions' => 'Transfer exact amount to PT Kreatif Abadi bank account and confirm via dashboard.',
+                'account_name' => 'PT KREATIF SKY ABADI',
+                'instructions' => 'Transfer exact amount to PT Kreatif Sky Abadi bank account and confirm via dashboard.',
             ],
         ]);
     }

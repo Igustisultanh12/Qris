@@ -11,9 +11,9 @@ class SettingSeeder extends Seeder
     {
         $settings = [
             // General
-            ['group' => 'general', 'key' => 'app_name', 'value' => 'Kreatif QRIS', 'type' => 'string', 'description' => 'Nama platform aplikasi'],
-            ['group' => 'general', 'key' => 'company_name', 'value' => 'PT Kreatif Abadi', 'type' => 'string', 'description' => 'Nama legal perusahaan'],
-            ['group' => 'general', 'key' => 'company_email', 'value' => 'support@kreatifabadi.co.id', 'type' => 'string', 'description' => 'Email kontak resmi'],
+            ['group' => 'general', 'key' => 'app_name', 'value' => 'Qmis', 'type' => 'string', 'description' => 'Nama platform aplikasi'],
+            ['group' => 'general', 'key' => 'company_name', 'value' => 'PT Kreatif Sky Abadi', 'type' => 'string', 'description' => 'Nama legal perusahaan'],
+            ['group' => 'general', 'key' => 'company_email', 'value' => 'support@kreatifskyabadi.co.id', 'type' => 'string', 'description' => 'Email kontak resmi'],
             ['group' => 'general', 'key' => 'company_phone', 'value' => '+62 21 555 0199', 'type' => 'string', 'description' => 'Nomor telepon kantor'],
             ['group' => 'general', 'key' => 'company_address', 'value' => 'Jl. Sudirman No. 88, Jakarta Pusat, DKI Jakarta 10220', 'type' => 'string', 'description' => 'Alamat kantor operasional'],
 
@@ -45,11 +45,11 @@ class SettingSeeder extends Seeder
             ['group' => 'mail', 'key' => 'mail_mailer', 'value' => 'smtp', 'type' => 'string', 'description' => 'Driver mailer aktif (smtp, sendmail, log)'],
             ['group' => 'mail', 'key' => 'mail_host', 'value' => 'smtp.mailtrap.io', 'type' => 'string', 'description' => 'Hostname SMTP server'],
             ['group' => 'mail', 'key' => 'mail_port', 'value' => '587', 'type' => 'integer', 'description' => 'Port SMTP server'],
-            ['group' => 'mail', 'key' => 'mail_username', 'value' => 'postmaster@kreatifabadi.co.id', 'type' => 'string', 'description' => 'Username SMTP autentikasi'],
+            ['group' => 'mail', 'key' => 'mail_username', 'value' => 'postmaster@kreatifskyabadi.co.id', 'type' => 'string', 'description' => 'Username SMTP autentikasi'],
             ['group' => 'mail', 'key' => 'mail_password', 'value' => '', 'type' => 'string', 'description' => 'Password SMTP autentikasi'],
             ['group' => 'mail', 'key' => 'mail_encryption', 'value' => 'tls', 'type' => 'string', 'description' => 'Enkripsi protokol (tls, ssl, none)'],
-            ['group' => 'mail', 'key' => 'mail_from_address', 'value' => 'noreply@kreatifabadi.co.id', 'type' => 'string', 'description' => 'Alamat email pengirim'],
-            ['group' => 'mail', 'key' => 'mail_from_name', 'value' => 'PT Kreatif Abadi QRIS Platform', 'type' => 'string', 'description' => 'Nama pengirim notifikasi'],
+            ['group' => 'mail', 'key' => 'mail_from_address', 'value' => 'noreply@kreatifskyabadi.co.id', 'type' => 'string', 'description' => 'Alamat email pengirim'],
+            ['group' => 'mail', 'key' => 'mail_from_name', 'value' => 'Qmis - PT Kreatif Sky Abadi', 'type' => 'string', 'description' => 'Nama pengirim notifikasi'],
             ['group' => 'mail', 'key' => 'mail_gateway_active', 'value' => '1', 'type' => 'boolean', 'description' => 'Status aktif pengiriman email transaksi'],
         ];
 

@@ -3,9 +3,9 @@
     <div class="sm:mx-auto sm:w-full sm:max-w-md text-center">
       <router-link to="/" class="inline-flex items-center gap-2 mb-6">
         <div class="w-10 h-10 rounded-xl bg-primary-600 flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-primary-600/30">
-          K
+          Q
         </div>
-        <span class="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Kreatif<span class="text-primary-600 dark:text-primary-400">QRIS</span></span>
+        <span class="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Q<span class="text-primary-600 dark:text-primary-400">mis</span></span>
       </router-link>
       <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
         Mulai Uji Coba Gratis 14 Hari
@@ -102,7 +102,7 @@
               class="w-4 h-4 mt-0.5 rounded border-slate-300 text-primary-600 focus:ring-primary-500"
             />
             <label for="terms" class="text-xs text-slate-600 dark:text-slate-400">
-              Saya menyetujui <router-link to="/legal" class="text-primary-600 dark:text-primary-400 hover:underline">Syarat & Ketentuan Layanan</router-link> serta <router-link to="/legal" class="text-primary-600 dark:text-primary-400 hover:underline">Kebijakan Privasi</router-link> PT Kreatif Abadi.
+              Saya menyetujui <router-link to="/legal" class="text-primary-600 dark:text-primary-400 hover:underline">Syarat & Ketentuan Layanan</router-link> serta <router-link to="/legal" class="text-primary-600 dark:text-primary-400 hover:underline">Kebijakan Privasi</router-link> PT Kreatif Sky Abadi.
             </label>
           </div>
 
@@ -166,7 +166,7 @@ const handleRegister = async () => {
     const data = res.data.data;
 
     auth.setAuth(data.token, data.user);
-    toast.success('Pendaftaran Berhasil!', 'Selamat datang di PT Kreatif Abadi QRIS Platform. Paket trial 14 hari telah aktif.');
+    toast.success('Pendaftaran Berhasil!', 'Selamat datang di Qmis (PT Kreatif Sky Abadi). Paket trial 14 hari telah aktif.');
     router.push('/dashboard');
   } catch (err: any) {
     if (err.response?.data?.errors) {

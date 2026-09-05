@@ -10,7 +10,7 @@
             </div>
             <div>
               <span class="font-bold text-sm text-white block leading-tight">Super Admin</span>
-              <span class="text-[10px] text-slate-400 block uppercase tracking-wider">PT Kreatif Abadi</span>
+              <span class="text-[10px] text-slate-400 block uppercase tracking-wider">PT Kreatif Sky Abadi</span>
             </div>
           </router-link>
         </div>

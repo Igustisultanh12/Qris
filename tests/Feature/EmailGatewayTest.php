@@ -23,7 +23,7 @@ class EmailGatewayTest extends TestCase
         parent::setUp();
         $this->seed();
 
-        $this->adminUser = User::where('email', 'admin@kreatifabadi.co.id')->first();
+        $this->adminUser = User::where('email', 'admin@kreatifskyabadi.co.id')->first();
     }
 
     public function test_it_retrieves_email_gateway_configuration(): void
@@ -55,8 +55,8 @@ class EmailGatewayTest extends TestCase
             'username' => 'testuser',
             'password' => 'secret123',
             'encryption' => 'tls',
-            'from_address' => 'system@kreatifabadi.co.id',
-            'from_name' => 'Kreatif Abadi Mail System',
+            'from_address' => 'system@kreatifskyabadi.co.id',
+            'from_name' => 'Qmis Mail System',
             'is_active' => true,
         ];
 
@@ -67,7 +67,7 @@ class EmailGatewayTest extends TestCase
             ->assertJsonPath('success', true)
             ->assertJsonPath('data.host', 'smtp.mailtrap.io')
             ->assertJsonPath('data.port', 2525)
-            ->assertJsonPath('data.from_address', 'system@kreatifabadi.co.id');
+            ->assertJsonPath('data.from_address', 'system@kreatifskyabadi.co.id');
 
         $this->assertEquals('smtp.mailtrap.io', Setting::get('mail_host'));
         $this->assertEquals(2525, Setting::get('mail_port'));

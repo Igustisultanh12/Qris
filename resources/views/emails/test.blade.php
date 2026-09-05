@@ -4,11 +4,11 @@
     <div style="text-align: center; margin-bottom: 24px;">
         <span class="badge badge-success">Verifikasi Koneksi Sukses</span>
         <h2 style="font-size: 20px; font-weight: 800; margin: 12px 0 4px 0; color: #0f172a;">Tes Email Gateway Berhasil!</h2>
-        <p style="color: #64748b; font-size: 13px; margin: 0;">Pengujian relay SMTP dan konfigurasi server pengiriman email PT Kreatif Abadi.</p>
+        <p style="color: #64748b; font-size: 13px; margin: 0;">Pengujian relay SMTP dan konfigurasi server pengiriman email PT Kreatif Sky Abadi.</p>
     </div>
 
     <p>Halo Administrator,</p>
-    <p>Pesan ini mengonfirmasi bahwa <strong>Sistem Email Gateway PT Kreatif Abadi</strong> telah terhubung dengan baik ke server SMTP dan siap digunakan untuk mengirimkan notifikasi transaksi, penagihan invoice, dan peringatan keamanan secara real-time.</p>
+    <p>Pesan ini mengonfirmasi bahwa <strong>Sistem Email Gateway PT Kreatif Sky Abadi</strong> telah terhubung dengan baik ke server SMTP dan siap digunakan untuk mengirimkan notifikasi transaksi, penagihan invoice, dan peringatan keamanan secara real-time.</p>
 
     <table class="table-data">
         <tr>

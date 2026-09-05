@@ -86,7 +86,7 @@ class WebhookController extends Controller
         $webhook = $customer->webhooks()->where(fn ($q) => $q->where('uuid', $id)->orWhere('id', $id))->firstOrFail();
 
         DispatchWebhookJob::dispatch($customer, 'test.ping', [
-            'message' => 'This is a test webhook payload from Kreatif QRIS Platform.',
+            'message' => 'This is a test webhook payload from Qmis Platform.',
             'webhook_id' => $webhook->uuid,
             'timestamp' => now()->toIso8601String(),
         ]);

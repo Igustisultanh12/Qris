@@ -9,7 +9,7 @@
             Pusat Bantuan & Tiket
           </h1>
           <p class="text-slate-600 dark:text-slate-400 text-sm mt-1">
-            Hubungi tim teknis PT Kreatif Abadi untuk kendala integrasi API, QRIS, atau penagihan.
+            Hubungi tim teknis PT Kreatif Sky Abadi untuk kendala integrasi API, QRIS, atau penagihan.
           </p>
         </div>
         <button
@@ -157,7 +157,7 @@
               ]"
             >
               <div class="flex justify-between font-bold">
-                <span>{{ msg.is_admin ? 'Tim Support PT Kreatif Abadi' : 'Anda' }}</span>
+                <span>{{ msg.is_admin ? 'Tim Support PT Kreatif Sky Abadi' : 'Anda' }}</span>
                 <span class="text-[10px] text-slate-400">{{ formatDate(msg.created_at) }}</span>
               </div>
               <p class="text-slate-700 dark:text-slate-300">{{ msg.message }}</p>

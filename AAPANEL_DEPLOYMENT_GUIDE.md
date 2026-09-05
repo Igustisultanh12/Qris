@@ -1,7 +1,7 @@
 # Panduan Lengkap Upload & Deployment ke aaPanel
-## PT Kreatif Abadi QRIS Platform (Kreatif QRIS)
+## Qmis - PT Kreatif Sky Abadi QRIS Platform
 
-Dokumen ini adalah panduan teknis langkah demi langkah (*step-by-step*) untuk melakukan proses deployment, instalasi, dan konfigurasi produksi **PT Kreatif Abadi QRIS Platform** pada server VPS Linux yang menggunakan control panel **aaPanel**.
+Dokumen ini adalah panduan teknis langkah demi langkah (*step-by-step*) untuk melakukan proses deployment, instalasi, dan konfigurasi produksi **Qmis (PT Kreatif Sky Abadi)** pada server VPS Linux yang menggunakan control panel **aaPanel**.
 
 ---
 
@@ -89,7 +89,7 @@ Klik **Save** lalu restart PHP 8.3.
 1. Masuk ke menu **Website** di sidebar aaPanel.
 2. Klik tombol **Add site**:
    - **Domain:** Masukkan domain atau subdomain Anda (misal: `qris.domainanda.com`).
-   - **Description:** `PT Kreatif Abadi QRIS Platform`
+   - **Description:** `Qmis - PT Kreatif Sky Abadi QRIS Platform`
    - **Root directory:** `/www/wwwroot/qris-platform`
    - **FTP:** *Do not create*
    - **Database:** *Do not create* (sudah dibuat pada langkah 3)
@@ -163,7 +163,7 @@ cp .env.example .env
 Buka file `.env` menggunakan File Manager aaPanel atau `nano .env`, lalu sesuaikan parameter berikut:
 
 ```ini
-APP_NAME="PT Kreatif Abadi QRIS Platform"
+APP_NAME="Qmis - PT Kreatif Sky Abadi"
 APP_ENV=production
 APP_DEBUG=false
 APP_URL=https://qris.domainanda.com
@@ -197,7 +197,7 @@ MAIL_USERNAME=postmaster@domainanda.com
 MAIL_PASSWORD=password_smtp_anda
 MAIL_ENCRYPTION=tls
 MAIL_FROM_ADDRESS=noreply@domainanda.com
-MAIL_FROM_NAME="PT Kreatif Abadi QRIS Platform"
+MAIL_FROM_NAME="Qmis - PT Kreatif Sky Abadi"
 ```
 
 Simpan perubahan file `.env`.
@@ -282,7 +282,7 @@ Laravel Task Scheduler bertugas menjalankan pembatalan transaksi kadaluarsa (`Ex
 1. Buka menu **Cron** di sidebar utama aaPanel.
 2. Isi formulir pembuatan cron job:
    - **Type of Task:** `Shell Script`
-   - **Name of Task:** `Kreatif QRIS Task Scheduler`
+   - **Name of Task:** `Qmis Task Scheduler`
    - **Period:** Pilih `Every 1 Minute` (N Minutes: 1)
    - **Script Content:**
      ```bash
@@ -298,8 +298,8 @@ Platform dilengkapi fitur **Email Gateway System** yang dapat diatur dan diuji l
 
 1. Buka browser dan akses URL domain Anda: `https://qris.domainanda.com/login`
 2. Masuk menggunakan akun **Super Admin**:
-   - **Email:** `admin@kreatifabadi.co.id`
-   - **Password:** `KreatifAbadi2026!`
+   - **Email:** `admin@kreatifskyabadi.co.id`
+   - **Password:** `KreatifSkyAbadi2026!`
 3. Pada sidebar menu, klik **Email Gateway & SMTP**.
 4. Masukkan konfigurasi SMTP provider Anda:
    - **Preset Cepat:** Klik tombol preset yang tersedia (*Gmail, Mailgun, Brevo, atau aaPanel Local Webmail*).
@@ -307,7 +307,7 @@ Platform dilengkapi fitur **Email Gateway System** yang dapat diatur dan diuji l
    - **Port:** `587` (TLS) atau `465` (SSL)
    - **Username & Password:** Akun SMTP Anda
    - **From Address:** Alamat email resmi Anda (misal: `billing@domainanda.com`)
-   - **From Name:** `PT Kreatif Abadi QRIS Platform`
+   - **From Name:** `Qmis - PT Kreatif Sky Abadi`
 5. Klik **Simpan Konfigurasi**.
 6. **Uji Pengiriman Email (Live Test Ping):**
    - Pada kolom *Kirim Ke Email*, ketikkan alamat email pribadi Anda.
@@ -329,4 +329,4 @@ Platform dilengkapi fitur **Email Gateway System** yang dapat diatur dan diuji l
 
 ---
 
-*PT Kreatif Abadi — Dokumentasi Resmi Deployment aaPanel.*
+*PT Kreatif Sky Abadi — Dokumentasi Resmi Deployment aaPanel.*

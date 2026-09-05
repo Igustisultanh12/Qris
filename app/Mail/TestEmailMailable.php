@@ -18,7 +18,7 @@ class TestEmailMailable extends Mailable
 
     public function build(): self
     {
-        return $this->subject('Tes Email Gateway - PT Kreatif Abadi QRIS Platform')
+        return $this->subject('Tes Email Gateway - Qmis PT Kreatif Sky Abadi')
             ->view('emails.test')
             ->with([
                 'recipient' => $this->recipientEmail,

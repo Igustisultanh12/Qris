@@ -20,7 +20,7 @@ class QrisEngineTest extends TestCase
         parent::setUp();
 
         // Build a guaranteed valid Indonesian Static QRIS payload
-        $base = '00020101021126620014ID.LINKAJA.WWW01189360091100220945610211000000000010303UMI51440014ID.CO.QRIS.WWW0215ID10200210000010303UMI5204541153033605802ID5919KREATIF ABADI STORE6013JAKARTA PUSAT61051011062070703A016304';
+        $base = '00020101021126620014ID.LINKAJA.WWW01189360091100220945610211000000000010303UMI51440014ID.CO.QRIS.WWW0215ID10200210000010303UMI5204541153033605802ID5923KREATIF SKY ABADI STORE6013JAKARTA PUSAT61051011062070703A016304';
         $crc = Crc16::calculate($base);
         $this->sampleStaticQris = $base . $crc;
     }
@@ -79,7 +79,7 @@ class QrisEngineTest extends TestCase
 
         $this->assertSame('01', $parsed->version);
         $this->assertSame('static', $parsed->method);
-        $this->assertSame('KREATIF ABADI STORE', $parsed->merchantName);
+        $this->assertSame('KREATIF SKY ABADI STORE', $parsed->merchantName);
         $this->assertSame('JAKARTA PUSAT', $parsed->merchantCity);
         $this->assertSame('5411', $parsed->merchantCategoryCode);
         $this->assertSame('360', $parsed->currency);
@@ -107,7 +107,7 @@ class QrisEngineTest extends TestCase
         $parsed = QrisParser::parse($result->dynamicPayload);
         $this->assertSame('dynamic', $parsed->method);
         $this->assertSame('50000', $parsed->amount);
-        $this->assertSame('KREATIF ABADI STORE', $parsed->merchantName);
+        $this->assertSame('KREATIF SKY ABADI STORE', $parsed->merchantName);
     }
 
     public function test_convert_static_to_dynamic_with_fixed_fee(): void

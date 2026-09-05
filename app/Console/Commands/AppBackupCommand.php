@@ -13,7 +13,7 @@ class AppBackupCommand extends Command
 
     public function handle(): int
     {
-        $this->info('Starting Kreatif QRIS backup process...');
+        $this->info('Starting Qmis backup process...');
 
         $backupDir = storage_path('app/backups/' . date('Y-m-d_His'));
         if (!File::isDirectory($backupDir)) {

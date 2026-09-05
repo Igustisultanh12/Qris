@@ -12,7 +12,7 @@
             Ketentuan Layanan & Kebijakan Privasi
           </h1>
           <p class="mt-3 text-slate-600 dark:text-slate-400 text-sm sm:text-base">
-            Standar Kepatuhan Operasional PT Kreatif Abadi & Regulasi QRIS Bank Indonesia (ASPI).
+            Standar Kepatuhan Operasional PT Kreatif Sky Abadi & Regulasi QRIS Bank Indonesia (ASPI).
           </p>
           <p class="text-xs text-slate-400 dark:text-slate-500 mt-2">Terakhir diperbarui: 1 Januari 2026</p>
         </div>
@@ -61,7 +61,7 @@
           <div v-if="activeTab === 'terms'" class="space-y-6">
             <h2 class="text-xl font-bold text-slate-900 dark:text-white">1. Ketentuan Umum</h2>
             <p>
-              Selamat datang di PT Kreatif Abadi QRIS Platform ("Platform", "Kami"). Dengan mendaftar, mengakses, atau menggunakan layanan ini, Anda ("Pengguna", "Pelanggan", atau "Merchant") menyetujui untuk terikat dengan seluruh syarat dan ketentuan berikut ini.
+              Selamat datang di Qmis - PT Kreatif Sky Abadi Platform ("Platform", "Kami"). Dengan mendaftar, mengakses, atau menggunakan layanan ini, Anda ("Pengguna", "Pelanggan", atau "Merchant") menyetujui untuk terikat dengan seluruh syarat dan ketentuan berikut ini.
             </p>
 
             <h2 class="text-xl font-bold text-slate-900 dark:text-white">2. Hak Akses & Kepemilikan Akun</h2>
@@ -73,7 +73,7 @@
 
             <h2 class="text-xl font-bold text-slate-900 dark:text-white">3. Penggunaan Layanan Konversi QRIS</h2>
             <p>
-              Platform PT Kreatif Abadi bertindak sebagai penyedia infrastruktur perangkat lunak konversi QRIS statis menjadi dinamis. Platform tidak memegang, menampung, atau mengendapkan dana transaksi pengguna (non-custodial). Seluruh dana dari pembayaran QRIS langsung masuk ke rekening bank/PJP acquirer merchant yang tercantum pada QRIS statis asli.
+              Platform Qmis (PT Kreatif Sky Abadi) bertindak sebagai penyedia infrastruktur perangkat lunak konversi QRIS statis menjadi dinamis. Platform tidak memegang, menampung, atau mengendapkan dana transaksi pengguna (non-custodial). Seluruh dana dari pembayaran QRIS langsung masuk ke rekening bank/PJP acquirer merchant yang tercantum pada QRIS statis asli.
             </p>
 
             <h2 class="text-xl font-bold text-slate-900 dark:text-white">4. Biaya Layanan & Pembatalan</h2>
@@ -115,7 +115,7 @@
           <div v-if="activeTab === 'qris'" class="space-y-6">
             <h2 class="text-xl font-bold text-slate-900 dark:text-white">1. Standar EMVCo & ASPI QRIS</h2>
             <p>
-              Sistem konversi PT Kreatif Abadi mematuhi spesifikasi standar <em>Quick Response Code Indonesian Standard (QRIS)</em> yang diterbitkan oleh Bank Indonesia dan Asosiasi Sistem Pembayaran Indonesia (ASPI), serta <em>EMVCo QR Code Specification for Payment Systems (Merchant-Presented Mode)</em>.
+              Sistem konversi Qmis (PT Kreatif Sky Abadi) mematuhi spesifikasi standar <em>Quick Response Code Indonesian Standard (QRIS)</em> yang diterbitkan oleh Bank Indonesia dan Asosiasi Sistem Pembayaran Indonesia (ASPI), serta <em>EMVCo QR Code Specification for Payment Systems (Merchant-Presented Mode)</em>.
             </p>
 
             <h2 class="text-xl font-bold text-slate-900 dark:text-white">2. Aturan Perubahan Tag EMVCo</h2>

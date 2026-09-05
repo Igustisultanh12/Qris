@@ -25,8 +25,8 @@ class EmailGatewayService
         $username = Setting::get('mail_username', config('mail.mailers.smtp.username'));
         $password = Setting::get('mail_password', config('mail.mailers.smtp.password'));
         $encryption = Setting::get('mail_encryption', 'tls');
-        $fromAddress = Setting::get('mail_from_address', config('mail.from.address', 'noreply@kreatifabadi.co.id'));
-        $fromName = Setting::get('mail_from_name', config('mail.from.name', 'PT Kreatif Abadi QRIS'));
+        $fromAddress = Setting::get('mail_from_address', config('mail.from.address', 'noreply@kreatifskyabadi.co.id'));
+        $fromName = Setting::get('mail_from_name', config('mail.from.name', 'Qmis - PT Kreatif Sky Abadi'));
 
         config([
             'mail.default' => $mailer,
@@ -56,8 +56,8 @@ class EmailGatewayService
             'username' => Setting::get('mail_username', config('mail.mailers.smtp.username', '')),
             'password_set' => !empty(Setting::get('mail_password', config('mail.mailers.smtp.password'))),
             'encryption' => Setting::get('mail_encryption', 'tls'),
-            'from_address' => Setting::get('mail_from_address', config('mail.from.address', 'noreply@kreatifabadi.co.id')),
-            'from_name' => Setting::get('mail_from_name', config('mail.from.name', 'PT Kreatif Abadi QRIS')),
+            'from_address' => Setting::get('mail_from_address', config('mail.from.address', 'noreply@kreatifskyabadi.co.id')),
+            'from_name' => Setting::get('mail_from_name', config('mail.from.name', 'Qmis - PT Kreatif Sky Abadi')),
             'is_active' => (bool) Setting::get('mail_gateway_active', true),
         ];
     }

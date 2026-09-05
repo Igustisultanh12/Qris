@@ -10,7 +10,7 @@ const api = axios.create({
 
 // Request interceptor
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('kreatif_auth_token');
+  const token = localStorage.getItem('qmis_auth_token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -28,8 +28,8 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401 && !window.location.pathname.startsWith('/login')) {
-      localStorage.removeItem('kreatif_auth_token');
-      localStorage.removeItem('kreatif_user');
+      localStorage.removeItem('qmis_auth_token');
+      localStorage.removeItem('qmis_user');
       window.location.href = '/login';
     }
     return Promise.reject(error);

@@ -5,13 +5,13 @@
         <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 mb-3">
           API Reference v1.0
         </div>
-        <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white">Dokumentasi REST API Kreatif QRIS</h1>
+        <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white">Dokumentasi REST API Qmis</h1>
         <p class="mt-2 text-sm sm:text-base text-slate-600 dark:text-slate-400 max-w-3xl">
           Integrasikan konversi QRIS static ke dynamic langsung ke dalam sistem kasir POS, web e-commerce, aplikasi mobile, atau microservice Anda.
         </p>
 
         <div class="mt-4 flex items-center gap-4 text-xs font-mono text-slate-500">
-          <span>Base URL: <code class="bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded text-indigo-600">https://api.kreatifabadi.co.id/api/v1</code></span>
+          <span>Base URL: <code class="bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded text-indigo-600">https://api.kreatifskyabadi.co.id/api/v1</code></span>
           <span>•</span>
           <a href="/docs/openapi.json" target="_blank" class="text-indigo-600 hover:underline">Download OpenAPI Spec (JSON)</a>
         </div>
@@ -132,12 +132,12 @@ const tabs = [
 ];
 
 const snippets: Record<string, string> = {
-  curl: `curl -X POST https://api.kreatifabadi.co.id/api/v1/qris/dynamic \\
+  curl: `curl -X POST https://api.kreatifskyabadi.co.id/api/v1/qris/dynamic \\
   -H "Authorization: Bearer ka_live_YOUR_API_KEY" \\
   -H "Content-Type: application/json" \\
   -H "Idempotency-Key: ORD-9988-ABC" \\
   -d '{
-    "merchant_id": "MC-KREATIF-001",
+    "merchant_id": "MC-QMIS-001",
     "amount": 50000,
     "reference": "INV-202609-001",
     "fee_type": "fixed",
@@ -149,11 +149,11 @@ const snippets: Record<string, string> = {
 $curl = curl_init();
 
 curl_setopt_array($curl, [
-  CURLOPT_URL => "https://api.kreatifabadi.co.id/api/v1/qris/dynamic",
+  CURLOPT_URL => "https://api.kreatifskyabadi.co.id/api/v1/qris/dynamic",
   CURLOPT_RETURNTRANSFER => true,
   CURLOPT_POST => true,
   CURLOPT_POSTFIELDS => json_encode([
-    "merchant_id" => "MC-KREATIF-001",
+    "merchant_id" => "MC-QMIS-001",
     "amount" => 50000,
     "reference" => "INV-202609-001",
     "fee_type" => "fixed",
@@ -174,9 +174,9 @@ echo "QRIS Dynamic: " . $data['data']['qris_string'];`,
 
 async function createDynamicQris() {
   const response = await axios.post(
-    'https://api.kreatifabadi.co.id/api/v1/qris/dynamic',
+    'https://api.kreatifskyabadi.co.id/api/v1/qris/dynamic',
     {
-      merchant_id: 'MC-KREATIF-001',
+      merchant_id: 'MC-QMIS-001',
       amount: 50000,
       reference: 'INV-202609-001',
       fee_type: 'fixed',
@@ -198,7 +198,7 @@ createDynamicQris();`,
 
   python: `import requests
 
-url = "https://api.kreatifabadi.co.id/api/v1/qris/dynamic"
+url = "https://api.kreatifskyabadi.co.id/api/v1/qris/dynamic"
 
 headers = {
     "Authorization": "Bearer ka_live_YOUR_API_KEY",
@@ -207,7 +207,7 @@ headers = {
 }
 
 payload = {
-    "merchant_id": "MC-KREATIF-001",
+    "merchant_id": "MC-QMIS-001",
     "amount": 50000,
     "reference": "INV-202609-001",
     "fee_type": "fixed",

@@ -1,13 +1,13 @@
 {
   "openapi": "3.0.3",
   "info": {
-    "title": "PT Kreatif Abadi QRIS Platform API",
+    "title": "Qmis API - PT Kreatif Sky Abadi",
     "description": "Production-grade REST API platform for converting static QRIS to dynamic QRIS with nominal amount, service fees, high-resolution rendering, and real-time transaction tracking.",
     "version": "1.0.0",
     "contact": {
-      "name": "PT Kreatif Abadi Developer Support",
-      "email": "support@kreatifabadi.co.id",
-      "url": "https://kreatifabadi.co.id"
+      "name": "PT Kreatif Sky Abadi Developer Support",
+      "email": "support@kreatifskyabadi.co.id",
+      "url": "https://kreatifskyabadi.co.id"
     }
   },
   "servers": [

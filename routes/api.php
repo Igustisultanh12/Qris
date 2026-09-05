@@ -26,7 +26,7 @@ use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
-| API Routes - Kreatif QRIS Platform
+| API Routes - Qmis (PT Kreatif Sky Abadi)
 |--------------------------------------------------------------------------
 */
 

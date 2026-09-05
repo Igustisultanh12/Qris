@@ -1,4 +1,4 @@
-# PT Kreatif Abadi QRIS Platform (Kreatif QRIS)
+# Qmis - PT Kreatif Sky Abadi QRIS Platform
 
 [![Laravel](https://img.shields.io/badge/Laravel-12.x-FF2D20?style=for-the-badge&logo=laravel&logoColor=white)](https://laravel.com)
 [![PHP](https://img.shields.io/badge/PHP-8.3-777BB4?style=for-the-badge&logo=php&logoColor=white)](https://php.net)
@@ -37,7 +37,7 @@ Banyak merchant UMKM, restoran, toko ritel, dan bisnis digital telah memiliki st
 - Kasir harus mengecek mutasi secara manual.
 - Sulit diintegrasikan ke sistem kasir POS, vending machine, website checkout, atau aplikasi mobile.
 
-**PT Kreatif Abadi QRIS Platform** memecahkan masalah ini dengan membaca dan mengurai QRIS statis milik merchant, lalu mengubahnya secara deterministik menjadi **QRIS Dinamis** yang langsung memuat nominal transaksi dan biaya layanan tertentu.
+**Qmis (PT Kreatif Sky Abadi)** memecahkan masalah ini dengan membaca dan mengurai QRIS statis milik merchant, lalu mengubahnya secara deterministik menjadi **QRIS Dinamis** yang langsung memuat nominal transaksi dan biaya layanan tertentu.
 
 Platform ini sepenuhnya patuh pada:
 - **Peraturan Anggota Dewan Gubernur Bank Indonesia (PADG BI) No. 21/18/PADG/2019** tentang Implementasi Standar Nasional Quick Response Code untuk Pembayaran.
@@ -48,7 +48,7 @@ Platform ini sepenuhnya patuh pada:
 
 ## 2. Arsitektur Algoritma QRIS Engine
 
-Diadaptasi dan disempurnakan dari referensi teknis algoritma QRIS [verssache/qris-dinamis](https://github.com/verssache/qris-dinamis), modul backend di `app/Services/Qris/` mengimplementasikan:
+Dibangun secara *in-house* dengan kepatuhan penuh terhadap regulasi Bank Indonesia (PADG No. 21/18/PADG/2019) dan spesifikasi standar EMVCo QR Code Merchant-Presented Mode (MPM), modul QRIS engine berkinerja tinggi di `app/Services/Qris/` mengimplementasikan:
 
 ```
 +------------------+      +-------------------+      +----------------------+
@@ -357,8 +357,8 @@ Akses menu ini di Portal Super Admin pada: **`/admin/email-gateway`**.
 Database telah dilengkapi dengan akun bawaan untuk pengujian instan:
 
 ### 1. Akun Super Admin
-- **Email:** `admin@kreatifabadi.co.id`
-- **Password:** `KreatifAbadi2026!`
+- **Email:** `admin@kreatifskyabadi.co.id`
+- **Password:** `KreatifSkyAbadi2026!`
 - **Role:** Super Admin (Akses penuh ke `/admin/*`)
 
 ### 2. Akun Demo Pelanggan (Merchant)
@@ -408,7 +408,7 @@ curl -X POST http://127.0.0.1:8000/api/v1/qris/validate \
   -H "X-API-Secret: kas_demoSecretKey9876543210zyxwvutsrq" \
   -H "Content-Type: application/json" \
   -d '{
-    "qris": "00020101021126620014ID.LINKAJA.WWW011893600911002200922802150000000000000000303UMI51440014ID.CO.QRIS.WWW0215ID10200210000000303UMI5204549953033605802ID5914KREATIF ABADI6007JAKARTA61051219063040C5C"
+    "qris": "00020101021126620014ID.LINKAJA.WWW01189360091100220945610211000000000010303UMI51440014ID.CO.QRIS.WWW0215ID10200210000010303UMI5204541153033605802ID5923KREATIF SKY ABADI STORE6013JAKARTA PUSAT61051011062070703A0163046155"
   }'
 ```
 
@@ -444,7 +444,7 @@ curl -X POST http://127.0.0.1:8000/api/v1/qris/dynamic \
     "reference": "INV-20260905-001",
     "merchant": {
       "code": "MC-DEMO-001",
-      "name": "Kreatif Abadi Store"
+      "name": "Kreatif Sky Abadi Store"
     },
     "amount": 50000,
     "fee_amount": 1500,
@@ -582,4 +582,4 @@ php artisan transactions:expire
 
 ## Hak Cipta & Lisensi
 
-Dikembangkan secara eksklusif untuk **PT Kreatif Abadi**. Seluruh hak cipta dilindungi undang-undang.
+Dikembangkan secara eksklusif untuk **PT Kreatif Sky Abadi**. Seluruh hak cipta dilindungi undang-undang.

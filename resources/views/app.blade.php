@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>PT Kreatif Abadi - Platform QRIS Static & Dynamic</title>
+    <title>Qmis - Platform QRIS Static & Dynamic PT Kreatif Sky Abadi</title>
     <meta name="description" content="Platform SaaS API & Manajemen QRIS Static ke Dynamic untuk Bisnis, POS, dan E-Commerce.">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">

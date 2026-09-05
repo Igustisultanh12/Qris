@@ -17,10 +17,10 @@
         <div class="h-16 px-6 flex items-center justify-between border-b border-slate-100 dark:border-slate-800">
           <router-link to="/dashboard" class="flex items-center gap-3">
             <div class="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-black text-lg shadow-sm">
-              K
+              Q
             </div>
             <div>
-              <span class="font-extrabold text-sm text-slate-900 dark:text-white block leading-none">Kreatif QRIS</span>
+              <span class="font-extrabold text-sm text-slate-900 dark:text-white block leading-none">Qmis</span>
               <span class="text-[10px] font-semibold text-indigo-600 dark:text-indigo-400 block mt-1 uppercase">Customer Portal</span>
             </div>
           </router-link>
@@ -36,7 +36,7 @@
         <div class="p-4 mx-3 my-2 rounded-xl bg-slate-100/70 dark:bg-slate-800/60 border border-slate-200/50 dark:border-slate-700/50">
           <p class="text-[11px] font-medium text-slate-500 uppercase tracking-wider">Perusahaan / Toko</p>
           <p class="text-xs font-bold text-slate-900 dark:text-white truncate mt-0.5">
-            {{ authStore.user?.customer?.business_name || 'PT Kreatif Abadi Merchant' }}
+            {{ authStore.user?.customer?.business_name || 'PT Kreatif Sky Abadi Merchant' }}
           </p>
         </div>
 
@@ -189,7 +189,7 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
-          <span class="font-bold text-sm text-slate-900 dark:text-white">Kreatif QRIS</span>
+          <span class="font-bold text-sm text-slate-900 dark:text-white">Qmis</span>
         </div>
 
         <button @click="themeStore.toggle" class="p-2 text-slate-500">

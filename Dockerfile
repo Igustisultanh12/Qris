@@ -1,4 +1,4 @@
-# Multi-stage Dockerfile for PT Kreatif Abadi QRIS Platform
+# Multi-stage Dockerfile for Qmis - PT Kreatif Sky Abadi QRIS Platform
 # Stage 1: Build Frontend Assets
 FROM node:20-alpine AS frontend
 WORKDIR /app

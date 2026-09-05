@@ -9,7 +9,7 @@
             Langganan & Tagihan
           </h1>
           <p class="text-slate-600 dark:text-slate-400 text-sm mt-1">
-            Kelola paket SaaS PT Kreatif Abadi Anda, riwayat faktur, dan metode pembayaran.
+            Kelola paket SaaS Qmis (PT Kreatif Sky Abadi) Anda, riwayat faktur, dan metode pembayaran.
           </p>
         </div>
         <button

@@ -85,7 +85,7 @@ class ApiPlatformTest extends TestCase
         ]);
 
         // Valid Indonesian Static QRIS
-        $base = '00020101021126620014ID.LINKAJA.WWW01189360091100220945610211000000000010303UMI51440014ID.CO.QRIS.WWW0215ID10200210000010303UMI5204541153033605802ID5919KREATIF ABADI STORE6013JAKARTA PUSAT61051011062070703A016304';
+        $base = '00020101021126620014ID.LINKAJA.WWW01189360091100220945610211000000000010303UMI51440014ID.CO.QRIS.WWW0215ID10200210000010303UMI5204541153033605802ID5923KREATIF SKY ABADI STORE6013JAKARTA PUSAT61051011062070703A016304';
         $this->validStaticQris = $base . Crc16::calculate($base);
 
         // Merchant A
@@ -154,7 +154,7 @@ class ApiPlatformTest extends TestCase
             ->assertJson([
                 'success' => true,
                 'data' => [
-                    'merchant_name' => 'KREATIF ABADI STORE',
+                    'merchant_name' => 'KREATIF SKY ABADI STORE',
                     'currency' => '360',
                     'method' => 'static',
                 ],

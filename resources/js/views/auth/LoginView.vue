@@ -3,9 +3,9 @@
     <div class="sm:mx-auto sm:w-full sm:max-w-md text-center">
       <router-link to="/" class="inline-flex items-center gap-2 mb-6">
         <div class="w-10 h-10 rounded-xl bg-primary-600 flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-primary-600/30">
-          K
+          Q
         </div>
-        <span class="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Kreatif<span class="text-primary-600 dark:text-primary-400">QRIS</span></span>
+        <span class="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Q<span class="text-primary-600 dark:text-primary-400">mis</span></span>
       </router-link>
       <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
         {{ twoFactorRequired ? 'Two-Factor Authentication' : 'Masuk ke Platform' }}
@@ -79,7 +79,7 @@
             <div class="grid grid-cols-2 gap-2">
               <button
                 type="button"
-                @click="quickLogin('admin@kreatifabadi.co.id', 'KreatifAbadi2026!')"
+                @click="quickLogin('admin@kreatifskyabadi.co.id', 'KreatifSkyAbadi2026!')"
                 class="px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors text-center"
               >
                 Super Admin

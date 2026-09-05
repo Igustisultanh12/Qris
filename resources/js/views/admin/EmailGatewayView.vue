@@ -145,7 +145,7 @@
                   <input
                     v-model="form.username"
                     type="text"
-                    placeholder="user@kreatifabadi.co.id"
+                    placeholder="user@kreatifskyabadi.co.id"
                     class="w-full px-3.5 py-2 rounded-xl border border-slate-800 bg-slate-900 text-white text-xs font-mono outline-none"
                   />
                 </div>
@@ -347,8 +347,8 @@ const form = reactive({
   password: '',
   password_set: false,
   encryption: 'tls',
-  from_address: 'noreply@kreatifabadi.co.id',
-  from_name: 'PT Kreatif Abadi QRIS Platform',
+  from_address: 'noreply@kreatifskyabadi.co.id',
+  from_name: 'Qmis - PT Kreatif Sky Abadi',
   is_active: true,
 });
 
@@ -363,8 +363,8 @@ const fetchConfig = async () => {
     form.username = data.username || '';
     form.password_set = !!data.password_set;
     form.encryption = data.encryption || 'tls';
-    form.from_address = data.from_address || 'noreply@kreatifabadi.co.id';
-    form.from_name = data.from_name || 'PT Kreatif Abadi QRIS Platform';
+    form.from_address = data.from_address || 'noreply@kreatifskyabadi.co.id';
+    form.from_name = data.from_name || 'Qmis - PT Kreatif Sky Abadi';
     form.is_active = data.is_active !== false;
   } catch (err) {
     console.error('Failed to load email gateway config:', err);

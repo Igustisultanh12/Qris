@@ -24,10 +24,10 @@ export interface User {
 }
 
 export const useAuthStore = defineStore('auth', () => {
-  const token = ref<string | null>(localStorage.getItem('kreatif_auth_token'));
+  const token = ref<string | null>(localStorage.getItem('qmis_auth_token'));
   const user = ref<User | null>(
-    localStorage.getItem('kreatif_user')
-      ? JSON.parse(localStorage.getItem('kreatif_user')!)
+    localStorage.getItem('qmis_user')
+      ? JSON.parse(localStorage.getItem('qmis_user')!)
       : null
   );
 
@@ -37,15 +37,15 @@ export const useAuthStore = defineStore('auth', () => {
   const setAuth = (newToken: string, newUser: User) => {
     token.value = newToken;
     user.value = newUser;
-    localStorage.setItem('kreatif_auth_token', newToken);
-    localStorage.setItem('kreatif_user', JSON.stringify(newUser));
+    localStorage.setItem('qmis_auth_token', newToken);
+    localStorage.setItem('qmis_user', JSON.stringify(newUser));
   };
 
   const clearAuth = () => {
     token.value = null;
     user.value = null;
-    localStorage.removeItem('kreatif_auth_token');
-    localStorage.removeItem('kreatif_user');
+    localStorage.removeItem('qmis_auth_token');
+    localStorage.removeItem('qmis_user');
   };
 
   const fetchUser = async () => {
@@ -53,7 +53,7 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       const response = await api.get('/auth/me');
       user.value = response.data.data;
-      localStorage.setItem('kreatif_user', JSON.stringify(user.value));
+      localStorage.setItem('qmis_user', JSON.stringify(user.value));
     } catch {
       clearAuth();
     }

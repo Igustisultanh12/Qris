@@ -6,11 +6,11 @@
         <!-- Logo -->
         <router-link to="/" class="flex items-center gap-3 group">
           <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white font-black text-xl shadow-md shadow-indigo-500/20 group-hover:scale-105 transition-transform">
-            K
+            Q
           </div>
           <div>
-            <span class="text-base font-extrabold tracking-tight text-slate-900 dark:text-white block leading-tight">Kreatif QRIS</span>
-            <span class="text-[10px] font-semibold tracking-wider text-indigo-600 dark:text-indigo-400 block uppercase">PT Kreatif Abadi</span>
+            <span class="text-base font-extrabold tracking-tight text-slate-900 dark:text-white block leading-tight">Qmis</span>
+            <span class="text-[10px] font-semibold tracking-wider text-indigo-600 dark:text-indigo-400 block uppercase">PT Kreatif Sky Abadi</span>
           </div>
         </router-link>
 
@@ -77,8 +77,8 @@
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-8">
         <div class="col-span-1 md:col-span-1">
           <div class="flex items-center gap-2 mb-3">
-            <div class="w-8 h-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-black">K</div>
-            <span class="font-bold text-slate-900 dark:text-white">PT Kreatif Abadi</span>
+            <div class="w-8 h-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-black">Q</div>
+            <span class="font-bold text-slate-900 dark:text-white">PT Kreatif Sky Abadi</span>
           </div>
           <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
             Platform SaaS API & Solusi QRIS Static ke Dynamic terdepan di Indonesia untuk UMKM, retail, F&B, dan enterprise.
@@ -107,14 +107,14 @@
           <h4 class="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white mb-3">Kontak Perusahaan</h4>
           <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
             Jl. Sudirman No. 88, Jakarta Pusat<br>
-            Email: support@kreatifabadi.co.id<br>
+            Email: support@kreatifskyabadi.co.id<br>
             Telp: +62 21 555 0199
           </p>
         </div>
       </div>
 
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 pt-8 border-t border-slate-100 dark:border-slate-800 text-center text-xs text-slate-400">
-        &copy; 2026 PT Kreatif Abadi. Seluruh Hak Cipta Dilindungi Undang-Undang.
+        &copy; 2026 PT Kreatif Sky Abadi. Seluruh Hak Cipta Dilindungi Undang-Undang.
       </div>
     </footer>
   </div>

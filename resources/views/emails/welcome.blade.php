@@ -3,12 +3,12 @@
 @section('content')
     <div style="text-align: center; margin-bottom: 24px;">
         <span class="badge badge-info">Selamat Datang</span>
-        <h2 style="font-size: 20px; font-weight: 800; margin: 12px 0 4px 0; color: #0f172a;">Selamat Bergabung di Kreatif QRIS!</h2>
+        <h2 style="font-size: 20px; font-weight: 800; margin: 12px 0 4px 0; color: #0f172a;">Selamat Bergabung di Qmis!</h2>
         <p style="color: #64748b; font-size: 13px; margin: 0;">Akun bisnis Anda telah aktif dengan akses uji coba gratis 14 hari.</p>
     </div>
 
     <p>Halo <strong>{{ $user->name }}</strong>,</p>
-    <p>Terima kasih telah mendaftar di <strong>PT Kreatif Abadi QRIS Platform</strong>. Kini Anda dapat mengubah QRIS statis toko/bisnis Anda menjadi QRIS dinamis dengan nominal rupiah otomatis dan integrasi REST API instan.</p>
+    <p>Terima kasih telah mendaftar di <strong>Qmis (PT Kreatif Sky Abadi)</strong>. Kini Anda dapat mengubah QRIS statis toko/bisnis Anda menjadi QRIS dinamis dengan nominal rupiah otomatis dan integrasi REST API instan.</p>
 
     <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin: 20px 0;">
         <h4 style="margin: 0 0 10px 0; font-size: 13px; color: #334155; text-transform: uppercase;">Detail Akun Anda</h4>
