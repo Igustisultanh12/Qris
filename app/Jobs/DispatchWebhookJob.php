@@ -70,10 +70,11 @@ class DispatchWebhookJob implements ShouldQueue
                 $response = Http::timeout(10)
                     ->withHeaders([
                         'Content-Type' => 'application/json',
-                        'User-Agent' => 'KreatifQRIS-Webhook/1.0',
-                        'X-Kreatif-Signature' => $signature,
-                        'X-Kreatif-Event' => $this->event,
-                        'X-Kreatif-Delivery' => $deliveryUuid,
+                        'User-Agent' => 'Qmis-Webhook/1.0',
+                        'X-Qmis-Signature' => $signature,
+                        'X-Signature-SHA256' => $signature,
+                        'X-Qmis-Event' => $this->event,
+                        'X-Qmis-Delivery' => $deliveryUuid,
                     ])
                     ->post($webhook->url, $payload);
 

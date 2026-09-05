@@ -372,7 +372,7 @@ Database telah dilengkapi dengan akun bawaan untuk pengujian instan:
 
 ---
 
-## 7. Dokumentasi REST API v1 & Contoh cURL
+## 8. Dokumentasi REST API v1 & Contoh cURL
 
 Seluruh endpoint publik berakar pada `/api/v1/*`. Setiap pemanggilan wajib menyertakan kredensial autentikasi.
 
@@ -440,7 +440,7 @@ curl -X POST http://127.0.0.1:8000/api/v1/qris/dynamic \
   "success": true,
   "message": "Dynamic QRIS generated successfully",
   "data": {
-    "transaction_id": "tx_9d817b12...",
+    "transaction_id": "tx_9d817b12-c288-4f70-a8ce-59fe849ce31c",
     "reference": "INV-20260905-001",
     "merchant": {
       "code": "MC-DEMO-001",
@@ -475,14 +475,204 @@ curl -X GET http://127.0.0.1:8000/api/v1/transactions/INV-20260905-001 \
 Membatalkan transaksi yang belum kadaluarsa sehingga QR tidak dapat dibayar lagi.
 
 ```bash
-curl -X POST http://127.0.0.1:8000/api/v1/qris/tx_9d817b12.../cancel \
+curl -X POST http://127.0.0.1:8000/api/v1/qris/tx_9d817b12-c288-4f70-a8ce-59fe849ce31c/cancel \
   -H "X-API-Key: ka_live_demo1234567890abcdef12" \
   -H "X-API-Secret: kas_demoSecretKey9876543210zyxwvutsrq"
 ```
 
 ---
 
-## 8. Panduan Portal Web
+### 6. Simulasi Pembayaran QRIS (Sandbox / Testing)
+Menyimulasikan pelanggan berhasil membayar transaksi QRIS di lingkungan sandbox/development tanpa uang riil. Endpoint ini langsung mengubah status transaksi menjadi `paid`, mengatur timestamp `paid_at`, mengirimkan email struk, dan **otomatis menembakkan Webhook notifikasi (`transaction.paid`)** ke URL webhook merchant Anda.
+
+Dapat dipanggil menggunakan `transaction_id` (UUID) atau kode `reference` pesanan:
+
+```bash
+curl -X POST http://127.0.0.1:8000/api/v1/qris/INV-20260905-001/simulate-paid \
+  -H "X-API-Key: ka_live_demo1234567890abcdef12" \
+  -H "X-API-Secret: kas_demoSecretKey9876543210zyxwvutsrq"
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Payment simulation successful. Transaction marked as paid and webhook dispatched.",
+  "data": {
+    "transaction_id": "tx_9d817b12-c288-4f70-a8ce-59fe849ce31c",
+    "reference": "INV-20260905-001",
+    "status": "paid",
+    "amount": 50000,
+    "fee_amount": 1500,
+    "total_amount": 51500,
+    "paid_at": "2026-09-05T10:35:12Z"
+  }
+}
+```
+
+---
+
+### 7. Sistem Webhook & Notifikasi Pembayaran Otomatis
+
+Webhook adalah mekanisme pengiriman notifikasi HTTP POST asinkron dari server **Qmis** ke server backend aplikasi Anda saat status transaksi berubah (khususnya saat pembayaran berhasil). Dengan webhook, sistem POS, e-commerce, atau aplikasi kasir Anda dapat **mengubah status pesanan secara otomatis menjadi PAID** tanpa perlu melakukan polling terus-menerus.
+
+#### Alur Kerja Notifikasi Otomatis
+```
++----------------+       1. Scan & Bayar       +-----------------+
+| Pelanggan / HP | --------------------------> | Bank / E-Wallet |
++----------------+                             +-----------------+
+                                                        |
+                                                        | 2. Settlement Notif
+                                                        v
++------------------+     3. HTTP POST Webhook    +-----------------+
+| Server Toko Anda | <-------------------------- |  Server QMIS    |
+| (Update ke PAID) |                             | (Auto Signature)|
++------------------+                             +-----------------+
+```
+
+1. **Pendaftaran Webhook:** Daftarkan URL endpoint Anda di menu **Customer Portal > Webhooks** (contoh: `https://toko-anda.com/api/webhooks/qmis`). Anda akan mendapatkan **Webhook Secret** (contoh: `whsec_live_9a8b7c6d5e4f...`).
+2. **Pengiriman Event:** Ketika QRIS dibayar (atau via endpoint simulasi), Qmis akan mengirimkan payload JSON ke URL Anda dengan HTTP Header keamanan.
+3. **Verifikasi Signature:** Server Anda wajib memverifikasi header `X-Qmis-Signature` menggunakan Webhook Secret sebelum mengupdate database.
+4. **Respon Cepat:** Kembalikan status HTTP `200 OK` segera setelah signature terverifikasi untuk mencegah retry otomatis.
+
+#### HTTP Headers yang Dikirimkan Qmis
+| Header Name | Keterangan |
+|-------------|------------|
+| `User-Agent` | `Qmis-Webhook/1.0` |
+| `Content-Type` | `application/json` |
+| `X-Qmis-Event` | Nama event, misalnya: `transaction.paid`, `transaction.expired`, atau `ping` |
+| `X-Qmis-Delivery` | UUID unik untuk pengiriman ini (berguna untuk audit dan idempotency) |
+| `X-Qmis-Signature` | Signature HMAC-SHA256: `hash_hmac('sha256', raw_json_payload, webhook_secret)` |
+| `X-Signature-SHA256` | Alias signature HMAC-SHA256 untuk kompatibilitas integrasi |
+
+#### Contoh Payload JSON (`transaction.paid`)
+```json
+{
+  "event": "transaction.paid",
+  "timestamp": "2026-09-05T10:35:12Z",
+  "data": {
+    "transaction_id": "tx_9d817b12-c288-4f70-a8ce-59fe849ce31c",
+    "reference": "INV-20260905-001",
+    "merchant": {
+      "code": "MC-DEMO-001",
+      "name": "Kreatif Sky Abadi Store"
+    },
+    "amount": 50000,
+    "fee_amount": 1500,
+    "total_amount": 51500,
+    "status": "paid",
+    "paid_at": "2026-09-05T10:35:12Z",
+    "created_at": "2026-09-05T10:20:00Z"
+  }
+}
+```
+
+#### Contoh Implementasi Verifikasi Webhook di Backend Toko / Aplikasi Anda
+
+##### A. PHP (Native / Laravel)
+```php
+<?php
+// Ambil raw payload dan signature
+$payload = file_get_contents('php://input');
+$signature = $_SERVER['HTTP_X_QMIS_SIGNATURE'] ?? $_SERVER['HTTP_X_SIGNATURE_SHA256'] ?? '';
+$secret = getenv('QMIS_WEBHOOK_SECRET'); // whsec_live_...
+
+// Hitung signature lokal
+$expected = hash_hmac('sha256', $payload, $secret);
+
+// Verifikasi dengan timing-safe comparison
+if (!hash_equals($expected, $signature)) {
+    http_response_code(401);
+    echo json_encode(['error' => 'Invalid signature']);
+    exit;
+}
+
+// Decode event data
+$event = json_decode($payload, true);
+
+if ($event['event'] === 'transaction.paid') {
+    $orderRef = $event['data']['reference'];
+    $amountPaid = $event['data']['total_amount'];
+    
+    // UPDATE DATABASE TOKO ANDA: Ubah status order menjadi 'PAID'
+    // Order::where('reference', $orderRef)->update(['status' => 'PAID', 'paid_at' => now()]);
+}
+
+// Selalu kembalikan HTTP 200 OK
+http_response_code(200);
+echo json_encode(['received' => true]);
+```
+
+##### B. Node.js (Express.js)
+```javascript
+const express = require('express');
+const crypto = require('crypto');
+const app = express();
+
+// PENTING: Gunakan raw body buffer agar string hash identik
+app.use('/webhook/qmis', express.raw({ type: 'application/json' }));
+
+app.post('/webhook/qmis', (req, res) => {
+  const signature = req.headers['x-qmis-signature'] || req.headers['x-signature-sha256'];
+  const secret = process.env.QMIS_WEBHOOK_SECRET;
+
+  // Hitung HMAC-SHA256
+  const hmac = crypto.createHmac('sha256', secret);
+  hmac.update(req.body);
+  const expected = hmac.digest('hex');
+
+  // Verifikasi signature secara aman
+  if (!crypto.timingSafeEqual(Buffer.from(signature || ''), Buffer.from(expected))) {
+    return res.status(401).json({ error: 'Invalid signature' });
+  }
+
+  const event = JSON.parse(req.body.toString());
+
+  if (event.event === 'transaction.paid') {
+    const { reference, total_amount } = event.data;
+    // UPDATE DATABASE TOKO: tandai order sebagai PAID
+    console.log(`Order ${reference} paid successfully: Rp ${total_amount}`);
+  }
+
+  // Respon status 200 segera
+  res.status(200).json({ received: true });
+});
+
+app.listen(3000, () => console.log('Webhook receiver running on port 3000'));
+```
+
+##### C. Python (FastAPI / Flask)
+```python
+import hmac
+import hashlib
+from fastapi import FastAPI, Request, HTTPException
+
+app = FastAPI()
+WEBHOOK_SECRET = "whsec_live_..."
+
+@app.post("/webhook/qmis")
+async def handle_qmis_webhook(request: Request):
+    signature = request.headers.get("x-qmis-signature") or request.headers.get("x-signature-sha256")
+    raw_body = await request.body()
+    
+    # Hitung HMAC-SHA256
+    expected = hmac.new(WEBHOOK_SECRET.encode(), raw_body, hashlib.sha256).hexdigest()
+    
+    if not signature or not hmac.compare_digest(expected, signature):
+        raise HTTPException(status_code=401, detail="Invalid signature")
+        
+    payload = await request.json()
+    if payload.get("event") == "transaction.paid":
+        order_ref = payload["data"]["reference"]
+        # UPDATE DATABASE SISTEM ANDA: Update order status to PAID
+        print(f"Order {order_ref} telah dibayar!")
+        
+    return {"received": True}
+```
+
+---
+
+## 9. Panduan Portal Web
 
 Aplikasi web dirancang dengan Vue 3 SPA yang responsif dan modern, mendukung mode Terang & Gelap (*Dark Mode*):
 
@@ -513,7 +703,7 @@ Aplikasi web dirancang dengan Vue 3 SPA yang responsif dan modern, mendukung mod
 
 ---
 
-## 9. Pengujian Otomatis (Automated Tests)
+## 10. Pengujian Otomatis (Automated Tests)
 
 Platform ini memiliki cakupan automated test suite yang lengkap pada level Unit dan Feature:
 
@@ -545,6 +735,7 @@ PASS  Tests\Feature\ApiPlatformTest
 ✓ dynamic qris creation converts static to dynamic with amount
 ✓ idempotency key prevents duplicate transaction creation
 ✓ rate limiter returns 429 when quota exceeded
+✓ simulate paid marks transaction as paid
 
 PASS  Tests\Feature\EmailGatewayTest
 ✓ it retrieves email gateway configuration
@@ -552,7 +743,7 @@ PASS  Tests\Feature\EmailGatewayTest
 ✓ it sends test email via email gateway
 ✓ it dispatches welcome email on registration
 
-Tests:    24 passed (93 assertions)
+Tests:    25 passed (98 assertions)
 Duration: 1.57s (100% Pass Rate)
 ```
 

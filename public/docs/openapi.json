@@ -210,6 +210,20 @@
         }
       }
     },
+    "/qris/{id}/simulate-paid": {
+      "post": {
+        "summary": "Simulate Payment (Sandbox / Test Mode)",
+        "description": "Simulate that customer has successfully paid this dynamic QRIS. Immediately transitions transaction status to 'paid', generates a payment reference, triggers the 'transaction.paid' webhook with HMAC-SHA256 signature to customer's registered webhook URL, and sends email receipt.",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "description": "Transaction number, UUID, or reference", "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Transaction marked as paid and webhook dispatched" },
+          "404": { "description": "Transaction not found" },
+          "422": { "description": "Cannot pay expired or cancelled transaction" }
+        }
+      }
+    },
     "/transactions": {
       "get": {
         "summary": "List Transactions",

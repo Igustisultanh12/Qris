@@ -17,6 +17,7 @@ use App\Services\Qris\DTOs\FeeData;
 use App\Services\Transaction\TransactionService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class QrisApiController extends Controller
 {
@@ -161,5 +162,52 @@ class QrisApiController extends Controller
         $transaction->update(['status' => 'cancelled']);
 
         return ApiResponse::success(new TransactionResource($transaction), 'Transaction cancelled successfully');
+    }
+
+    /**
+     * Simulate payment for an unpaid dynamic QRIS transaction (for sandbox/integration testing).
+     * Automatically updates transaction to PAID, dispatches 'transaction.paid' webhook with HMAC-SHA256,
+     * and triggers email receipt.
+     */
+    public function simulatePaid(Request $request, string $id): JsonResponse
+    {
+        /** @var Customer $customer */
+        $customer = $request->attributes->get('customer');
+
+        $transaction = Transaction::where('customer_id', $customer->id)
+            ->where(function ($q) use ($id) {
+                $q->where('transaction_number', $id)
+                  ->orWhere('uuid', $id)
+                  ->orWhere('reference', $id);
+            })
+            ->first();
+
+        if (!$transaction) {
+            return ApiResponse::error('Transaction not found', null, 404);
+        }
+
+        if ($transaction->status === 'paid') {
+            return ApiResponse::success(new TransactionResource($transaction), 'Transaction is already paid');
+        }
+
+        if ($transaction->status === 'cancelled' || $transaction->status === 'expired') {
+            return ApiResponse::error("Cannot simulate payment for transaction with status '{$transaction->status}'", null, 422);
+        }
+
+        $paymentRef = 'SIM-PAID-' . strtoupper(Str::random(10));
+        $transaction = $this->transactionService->markAsPaid(
+            $transaction,
+            $paymentRef,
+            [
+                'simulated' => true,
+                'simulated_at' => now()->toIso8601String(),
+                'ip_address' => $request->ip(),
+            ]
+        );
+
+        return ApiResponse::success(
+            new TransactionResource($transaction),
+            'Payment successfully simulated. Transaction status changed to PAID and webhook event transaction.paid has been dispatched.'
+        );
     }
 }

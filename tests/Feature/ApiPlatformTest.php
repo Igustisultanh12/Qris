@@ -256,4 +256,31 @@ class ApiPlatformTest extends TestCase
 
         $response->assertStatus(404);
     }
+
+    public function test_simulate_paid_marks_transaction_as_paid(): void
+    {
+        // Generate transaction first
+        $createRes = $this->withHeader('Authorization', 'Bearer ' . $this->plainKeyA)
+            ->postJson('/api/v1/qris/dynamic', [
+                'merchant_id' => $this->merchantA->merchant_code,
+                'amount' => 50000,
+                'reference' => 'TEST-SIM-PAID-001',
+            ]);
+
+        $createRes->assertStatus(201);
+        $txNumber = $createRes->json('data.transaction_id');
+
+        // Call simulate-paid
+        $simRes = $this->withHeader('Authorization', 'Bearer ' . $this->plainKeyA)
+            ->postJson("/api/v1/qris/{$txNumber}/simulate-paid");
+
+        $simRes->assertStatus(200)
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('data.status', 'paid');
+
+        $this->assertDatabaseHas('transactions', [
+            'transaction_number' => $txNumber,
+            'status' => 'paid',
+        ]);
+    }
 }

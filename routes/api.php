@@ -64,11 +64,13 @@ Route::prefix('v1')->middleware(['assign.request.id'])->group(function () {
             Route::post('/dynamic', [QrisApiController::class, 'createDynamic']);
             Route::get('/{id}', [QrisApiController::class, 'show']);
             Route::post('/{id}/cancel', [QrisApiController::class, 'cancel']);
+            Route::post('/{id}/simulate-paid', [QrisApiController::class, 'simulatePaid']);
         });
 
         Route::prefix('transactions')->group(function () {
             Route::get('/', [TransactionApiController::class, 'index']);
             Route::get('/{id}', [TransactionApiController::class, 'show']);
+            Route::post('/{id}/simulate-paid', [QrisApiController::class, 'simulatePaid']);
         });
 
         Route::prefix('merchants')->group(function () {
