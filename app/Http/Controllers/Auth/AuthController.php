@@ -101,6 +101,13 @@ class AuthController extends Controller
             newValues: ['email' => $user->email, 'customer_id' => $customer->id]
         );
 
+        // Dispatch welcome email via Email Gateway
+        try {
+            app(\App\Services\Mail\EmailGatewayService::class)->sendWelcomeEmail($user, $customer);
+        } catch (\Throwable $e) {
+            // Non-blocking
+        }
+
         return ApiResponse::success([
             'token' => $token,
             'user' => [

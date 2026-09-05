@@ -28,6 +28,7 @@ import AdminCustomersView from '../views/admin/CustomersView.vue';
 import AdminPlansView from '../views/admin/PlansView.vue';
 import AdminReportsView from '../views/admin/ReportsView.vue';
 import AdminAuditLogsView from '../views/admin/AuditLogsView.vue';
+import AdminEmailGatewayView from '../views/admin/EmailGatewayView.vue';
 import AdminSettingsView from '../views/admin/SettingsView.vue';
 
 const routes: RouteRecordRaw[] = [
@@ -59,6 +60,7 @@ const routes: RouteRecordRaw[] = [
   { path: '/admin/plans', name: 'admin-plans', component: AdminPlansView, meta: { requiresAuth: true, requiresAdmin: true } },
   { path: '/admin/reports', name: 'admin-reports', component: AdminReportsView, meta: { requiresAuth: true, requiresAdmin: true } },
   { path: '/admin/audit-logs', name: 'admin-audit-logs', component: AdminAuditLogsView, meta: { requiresAuth: true, requiresAdmin: true } },
+  { path: '/admin/email-gateway', name: 'admin-email-gateway', component: AdminEmailGatewayView, meta: { requiresAuth: true, requiresAdmin: true } },
   { path: '/admin/settings', name: 'admin-settings', component: AdminSettingsView, meta: { requiresAuth: true, requiresAdmin: true } },
 
   // Fallback

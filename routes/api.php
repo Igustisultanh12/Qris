@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AdminAuditController;
 use App\Http\Controllers\Admin\AdminCustomerController;
 use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\AdminEmailGatewayController;
 use App\Http\Controllers\Admin\AdminFinancialController;
 use App\Http\Controllers\Admin\AdminPlanController;
 use App\Http\Controllers\Admin\AdminSettingController;
@@ -145,5 +146,10 @@ Route::middleware(['auth:sanctum', 'assign.request.id'])->group(function () {
         Route::get('/settings', [AdminSettingController::class, 'index']);
         Route::post('/settings/update', [AdminSettingController::class, 'update']);
         Route::get('/audit-logs', [AdminAuditController::class, 'index']);
+
+        // Email Gateway System
+        Route::get('/email-gateway', [AdminEmailGatewayController::class, 'index']);
+        Route::post('/email-gateway', [AdminEmailGatewayController::class, 'update']);
+        Route::post('/email-gateway/test', [AdminEmailGatewayController::class, 'sendTest']);
     });
 });

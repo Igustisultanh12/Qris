@@ -19,11 +19,13 @@
 5. [Panduan Instalasi & Menjalankan Sistem](#5-panduan-instalasi--menjalankan-sistem)
    - [A. Menggunakan Docker Compose (Direkomendasikan)](#a-menggunakan-docker-compose)
    - [B. Instalasi Lokal (Manual)](#b-instalasi-lokal-manual)
-6. [Kredensial Bawaan (Seeders)](#6-kredensial-bawaan-seeders)
-7. [Dokumentasi REST API v1 & Contoh cURL](#7-dokumentasi-rest-api-v1--contoh-curl)
-8. [Panduan Portal Web](#8-panduan-portal-web)
-9. [Pengujian Otomatis (Automated Tests)](#9-pengujian-otomatis-automated-tests)
-10. [Operasional, Backup & Keamanan](#10-operasional-backup--keamanan)
+   - [C. Panduan Lengkap Upload & Deployment ke aaPanel](#c-panduan-lengkap-upload--deployment-ke-aapanel)
+6. [Sistem Email Gateway & SMTP Relay](#6-sistem-email-gateway--smtp-relay)
+7. [Kredensial Bawaan (Seeders)](#7-kredensial-bawaan-seeders)
+8. [Dokumentasi REST API v1 & Contoh cURL](#8-dokumentasi-rest-api-v1--contoh-curl)
+9. [Panduan Portal Web](#9-panduan-portal-web)
+10. [Pengujian Otomatis (Automated Tests)](#10-pengujian-otomatis-automated-tests)
+11. [Operasional, Backup & Keamanan](#11-operasional-backup--keamanan)
 
 ---
 
@@ -237,7 +239,120 @@ Pastikan Docker dan Docker Compose telah terpasang di sistem Anda.
 
 ---
 
-## 6. Kredensial Bawaan (Seeders)
+### C. Panduan Lengkap Upload & Deployment ke aaPanel
+
+Panduan komprehensif terpisah juga tersedia di: **[`AAPANEL_DEPLOYMENT_GUIDE.md`](./AAPANEL_DEPLOYMENT_GUIDE.md)**.
+
+Berikut adalah ringkasan alur instalasi produksi pada server Linux menggunakan **aaPanel**:
+
+#### 1. Persiapan Software di aaPanel App Store
+Masuk ke dashboard aaPanel Anda (`http://IP-SERVER:7800`) > menu **App Store**, lalu pasang:
+- **Nginx:** 1.24 atau 1.26
+- **PHP:** 8.3
+- **MySQL:** 8.0
+- **Redis:** 7.0
+- **Node.js Version Manager:** Install Node 20.x
+- **Supervisor:** Process manager untuk antrean Laravel
+
+#### 2. Konfigurasi PHP 8.3 di aaPanel (Penting!)
+- **Install Extensions:** Masuk ke App Store > PHP 8.3 > Setting > *Install extensions* > pasang: `fileinfo`, `redis`, `opcache`, `exif`, `intl`, `bcmath`.
+- **Hapus Pembatasan Fungsi (*Disabled Functions*):**
+  Masuk ke App Store > PHP 8.3 > Setting > *Disabled functions* > **HAPUS** fungsi-fungsi berikut dari daftar:
+  `putenv`, `proc_open`, `proc_get_status`, `pcntl_signal`, `pcntl_alarm`, `symlink`.
+  *Lalu restart service PHP 8.3.*
+
+#### 3. Buat Database & Tambahkan Website di aaPanel
+1. Masuk ke menu **Databases** > klik **Add Database** > buat DB `qris_platform` dengan user `qris_user` (catat passwordnya).
+2. Masuk ke menu **Website** > klik **Add site**:
+   - **Domain:** Masukkan domain Anda (misal: `qris.perusahaananda.com`)
+   - **Root directory:** `/www/wwwroot/qris-platform`
+   - **PHP Version:** `PHP-83`
+
+#### 4. Upload Kode Program (via Git Clone)
+Buka menu **Terminal** di aaPanel atau login via SSH:
+```bash
+cd /www/wwwroot
+rm -rf qris-platform
+git clone https://github.com/Igustisultanh12/Qris.git qris-platform
+cd qris-platform
+```
+
+#### 5. Atur Document Root & URL Rewrite Nginx
+1. Di menu **Website** aaPanel > klik nama domain Anda > tab **Site directory**:
+   - Ganti **Running directory** ke `/public` lalu klik **Save**.
+2. Masuk ke tab **URL rewrite**:
+   Pilih template **Laravel 5** atau paste rule Nginx berikut:
+   ```nginx
+   location / {
+       try_files $uri $uri/ /index.php?$query_string;
+   }
+   ```
+   Klik **Save**.
+
+#### 6. Inisialisasi Environment & Database
+Di Terminal server:
+```bash
+cd /www/wwwroot/qris-platform
+cp .env.example .env
+# Edit konfigurasi DB & APP_URL di .env:
+# nano .env
+
+composer install --no-dev --optimize-autoloader
+php artisan key:generate
+php artisan storage:link
+php artisan migrate:fresh --seed --force
+npm install && npm run build
+chown -R www:www .
+chmod -R 775 storage bootstrap/cache
+```
+
+#### 7. Pasang SSL Gratis (Let's Encrypt)
+Di pengaturan website aaPanel > tab **SSL** > pilih **Let's Encrypt** > klik **Apply** > aktifkan toggle **Force HTTPS**.
+
+#### 8. Setup Supervisor (Queue Worker) & Cron Task
+1. Buka App Store > **Supervisor** > Setting > **Add Process**:
+   - **Name:** `qris-worker`
+   - **Run User:** `www`
+   - **Run Dir:** `/www/wwwroot/qris-platform`
+   - **Command:** `/usr/bin/php /www/wwwroot/qris-platform/artisan queue:work --sleep=3 --tries=3`
+2. Buka menu **Cron** aaPanel > tambahkan task:
+   - **Period:** `Every 1 Minute`
+   - **Script:** `/usr/bin/php /www/wwwroot/qris-platform/artisan schedule:run >> /dev/null 2>&1`
+
+---
+
+## 6. Sistem Email Gateway & SMTP Relay
+
+Platform dilengkapi dengan **Sistem Email Gateway Dinamis** (arsitektur seperti pada platform *sisfoperskc* / *instagram unfollowers*) yang dapat dikonfigurasi dan diuji secara real-time langsung melalui portal web Super Admin tanpa perlu mengubah file konfigurasi server secara manual:
+
+```
++---------------------+     +-----------------------+     +------------------------+
+| Transaksi / Invoice | --> |  EmailGatewayService  | --> | Dynamic SMTP Transport |
+|  Pendaftaran Akun   |     |  Template & Branding  |     | Gmail/Mailgun/Brevo/cPanel
++---------------------+     +-----------------------+     +------------------------+
+                                        |
+                                        v
+                            +-----------------------+
+                            | Live Test Ping UI     |
+                            | Latency & Status Cek  |
+                            +-----------------------+
+```
+
+### Fitur Email Gateway:
+1. **Multi-Driver Support:** Mendukung relay `smtp`, `sendmail`, dan `log` (debug mode).
+2. **Kustomisasi Port & Enkripsi:** Fleksibel untuk TLS (Port 587), SSL (Port 465), atau Non-TLS (Port 25).
+3. **Preset Populer 1-Klik:** Dilengkapi tombol preset cepat untuk Gmail / G-Suite, Mailgun, Brevo (Sendinblue), dan aaPanel / cPanel Webmail lokal.
+4. **Live Test Send (Ping):** Uji coba koneksi SMTP real-time ke email penerima uji coba dengan pelaporan kecepatan respon (*roundtrip latency dalam milidetik*) dan pesan kesalahan diagnostik.
+5. **Template Email HTML Responsif:**
+   - Resi konfirmasi pembayaran transaksi QRIS dinamis (`TransactionReceiptMailable`).
+   - Email selamat datang & kredensial onboarding akun merchant baru (`WelcomeCustomerMailable`).
+   - Pemberitahuan penerbitan faktur tagihan langganan SaaS (`InvoiceCreatedMailable`).
+
+Akses menu ini di Portal Super Admin pada: **`/admin/email-gateway`**.
+
+---
+
+## 7. Kredensial Bawaan (Seeders)
 
 Database telah dilengkapi dengan akun bawaan untuk pengujian instan:
 
@@ -431,13 +546,19 @@ PASS  Tests\Feature\ApiPlatformTest
 ✓ idempotency key prevents duplicate transaction creation
 ✓ rate limiter returns 429 when quota exceeded
 
-Tests:    18 passed (70 assertions)
-Duration: ~1.2s
+PASS  Tests\Feature\EmailGatewayTest
+✓ it retrieves email gateway configuration
+✓ it updates email gateway configuration
+✓ it sends test email via email gateway
+✓ it dispatches welcome email on registration
+
+Tests:    24 passed (93 assertions)
+Duration: 1.57s (100% Pass Rate)
 ```
 
 ---
 
-## 10. Operasional, Backup & Keamanan
+## 11. Operasional, Backup & Keamanan
 
 ### A. Backup Otomatis
 Jalankan perintah backup database dan asset kapan saja:

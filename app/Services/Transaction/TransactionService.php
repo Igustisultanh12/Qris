@@ -156,4 +156,44 @@ class TransactionService
 
         return $transaction;
     }
+
+    /**
+     * Mark a dynamic transaction as paid and trigger webhooks and email receipts.
+     */
+    public function markAsPaid(Transaction $transaction, ?string $paymentRef = null, array $metadata = []): Transaction
+    {
+        if ($transaction->status === 'paid') {
+            return $transaction;
+        }
+
+        $transaction->update([
+            'status' => 'paid',
+            'paid_at' => now(),
+            'metadata' => array_merge($transaction->metadata ?? [], $metadata, [
+                'payment_reference' => $paymentRef,
+                'paid_at' => now()->toIso8601String(),
+            ]),
+        ]);
+
+        // 1. Dispatch Webhook
+        DispatchWebhookJob::dispatch($transaction->customer, 'transaction.paid', [
+            'transaction_id' => $transaction->transaction_number,
+            'uuid' => $transaction->uuid,
+            'reference' => $transaction->reference,
+            'amount' => $transaction->amount,
+            'fee' => $transaction->fee,
+            'total' => $transaction->total,
+            'status' => 'paid',
+            'paid_at' => $transaction->paid_at->toIso8601String(),
+        ]);
+
+        // 2. Dispatch Email Receipt via Email Gateway
+        try {
+            app(\App\Services\Mail\EmailGatewayService::class)->sendTransactionPaidEmail($transaction);
+        } catch (\Throwable $e) {
+            // Non-blocking
+        }
+
+        return $transaction;
+    }
 }

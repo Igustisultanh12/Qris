@@ -40,6 +40,17 @@ class SettingSeeder extends Seeder
             ['group' => 'security', 'key' => 'security_max_login_attempts', 'value' => '5', 'type' => 'integer', 'description' => 'Batas percobaan login sebelum lockout'],
             ['group' => 'security', 'key' => 'security_session_lifetime_minutes', 'value' => '120', 'type' => 'integer', 'description' => 'Masa aktif session login (menit)'],
             ['group' => 'security', 'key' => 'security_maintenance_mode', 'value' => '0', 'type' => 'boolean', 'description' => 'Status mode pemeliharaan sistem'],
+
+            // Email Gateway
+            ['group' => 'mail', 'key' => 'mail_mailer', 'value' => 'smtp', 'type' => 'string', 'description' => 'Driver mailer aktif (smtp, sendmail, log)'],
+            ['group' => 'mail', 'key' => 'mail_host', 'value' => 'smtp.mailtrap.io', 'type' => 'string', 'description' => 'Hostname SMTP server'],
+            ['group' => 'mail', 'key' => 'mail_port', 'value' => '587', 'type' => 'integer', 'description' => 'Port SMTP server'],
+            ['group' => 'mail', 'key' => 'mail_username', 'value' => 'postmaster@kreatifabadi.co.id', 'type' => 'string', 'description' => 'Username SMTP autentikasi'],
+            ['group' => 'mail', 'key' => 'mail_password', 'value' => '', 'type' => 'string', 'description' => 'Password SMTP autentikasi'],
+            ['group' => 'mail', 'key' => 'mail_encryption', 'value' => 'tls', 'type' => 'string', 'description' => 'Enkripsi protokol (tls, ssl, none)'],
+            ['group' => 'mail', 'key' => 'mail_from_address', 'value' => 'noreply@kreatifabadi.co.id', 'type' => 'string', 'description' => 'Alamat email pengirim'],
+            ['group' => 'mail', 'key' => 'mail_from_name', 'value' => 'PT Kreatif Abadi QRIS Platform', 'type' => 'string', 'description' => 'Nama pengirim notifikasi'],
+            ['group' => 'mail', 'key' => 'mail_gateway_active', 'value' => '1', 'type' => 'boolean', 'description' => 'Status aktif pengiriman email transaksi'],
         ];
 
         foreach ($settings as $s) {
