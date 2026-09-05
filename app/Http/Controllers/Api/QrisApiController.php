@@ -125,7 +125,8 @@ class QrisApiController extends Controller
         $transaction = Transaction::where('customer_id', $customer->id)
             ->where(function ($q) use ($id) {
                 $q->where('transaction_number', $id)
-                  ->orWhere('uuid', $id);
+                  ->orWhere('uuid', $id)
+                  ->orWhere('reference', $id);
             })
             ->first();
 
@@ -147,7 +148,8 @@ class QrisApiController extends Controller
         $transaction = Transaction::where('customer_id', $customer->id)
             ->where(function ($q) use ($id) {
                 $q->where('transaction_number', $id)
-                  ->orWhere('uuid', $id);
+                  ->orWhere('uuid', $id)
+                  ->orWhere('reference', $id);
             })
             ->first();
 
