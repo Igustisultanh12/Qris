@@ -130,7 +130,7 @@
                 </td>
                 <td class="py-3.5 px-4 text-right">
                   <button
-                    @click="viewTransactionDetails(tx.id)"
+                    @click="viewTransactionDetails(tx.uuid || tx.reference || tx.id)"
                     class="px-3 py-1 rounded-lg text-xs font-semibold bg-primary-50 text-primary-600 hover:bg-primary-100 dark:bg-primary-950/60 dark:text-primary-400 transition-colors"
                   >
                     Detail QR
@@ -207,7 +207,7 @@
           <div class="flex justify-between items-center pt-2">
             <button
               v-if="selectedTx.status === 'generated'"
-              @click="cancelTx(selectedTx.id)"
+              @click="cancelTx(selectedTx.uuid || selectedTx.id)"
               class="px-4 py-2 text-xs font-bold text-rose-600 bg-rose-50 dark:bg-rose-950/40 rounded-xl hover:bg-rose-100"
             >
               Batalkan Transaksi
@@ -277,8 +277,17 @@ const fetchTransactions = async (page = 1) => {
       to_date: filters.to_date || undefined,
     };
     const res = await api.get('/customer/transactions', { params });
-    transactions.value = res.data.data;
-    meta.value = res.data.meta;
+    const raw = res.data.data;
+    if (Array.isArray(raw)) {
+      transactions.value = raw;
+      meta.value = res.data.meta || null;
+    } else if (raw && Array.isArray(raw.data)) {
+      transactions.value = raw.data;
+      meta.value = raw;
+    } else {
+      transactions.value = [];
+      meta.value = null;
+    }
   } catch (err) {
     console.error('Failed to load transactions:', err);
   } finally {
@@ -286,7 +295,7 @@ const fetchTransactions = async (page = 1) => {
   }
 };
 
-const viewTransactionDetails = async (id: number) => {
+const viewTransactionDetails = async (id: any) => {
   try {
     const res = await api.get(`/customer/transactions/${id}`);
     selectedTx.value = res.data.data;
@@ -296,7 +305,7 @@ const viewTransactionDetails = async (id: number) => {
   }
 };
 
-const cancelTx = async (id: number) => {
+const cancelTx = async (id: any) => {
   if (!confirm('Batalkan transaksi ini? QRIS tidak akan dapat dibayar lagi.')) return;
   try {
     await api.post(`/customer/transactions/${id}/cancel`);

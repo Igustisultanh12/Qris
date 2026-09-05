@@ -258,8 +258,10 @@ const fetchBilling = async () => {
     ]);
 
     subscription.value = subRes.data.data;
-    invoices.value = invRes.data.data;
-    plans.value = plansRes.data.data;
+    const invRaw = invRes.data.data;
+    invoices.value = Array.isArray(invRaw) ? invRaw : (invRaw?.data || []);
+    const pRaw = plansRes.data.data;
+    plans.value = Array.isArray(pRaw) ? pRaw : (pRaw?.data || []);
   } catch (err) {
     console.error('Failed to load billing:', err);
   } finally {
@@ -276,7 +278,8 @@ const processPayment = async () => {
   if (!selectedInvoice.value) return;
   paying.value = true;
   try {
-    const res = await api.post(`/customer/billing/invoices/${selectedInvoice.value.id}/pay`, {
+    const invId = selectedInvoice.value.uuid || selectedInvoice.value.id;
+    const res = await api.post(`/customer/billing/invoices/${invId}/pay`, {
       gateway: paymentGateway.value,
     });
     toast.success('Pembayaran Diproses', res.data.message || 'Invoice berhasil dibayar.');

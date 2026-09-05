@@ -85,12 +85,37 @@ class WebhookController extends Controller
         $customer = $request->user()->customer;
         $webhook = $customer->webhooks()->where(fn ($q) => $q->where('uuid', $id)->orWhere('id', $id))->firstOrFail();
 
-        DispatchWebhookJob::dispatch($customer, 'test.ping', [
-            'message' => 'This is a test webhook payload from Qmis Platform.',
+        $payload = [
+            'event' => 'test.ping',
             'webhook_id' => $webhook->uuid,
             'timestamp' => now()->toIso8601String(),
-        ]);
+            'message' => 'This is a test webhook payload from Qmis Platform PT Kreatif Sky Abadi.',
+        ];
+        $signature = hash_hmac('sha256', json_encode($payload), $webhook->secret);
 
-        return ApiResponse::success(null, 'Test webhook dispatched successfully');
+        try {
+            $client = new \GuzzleHttp\Client(['timeout' => 4, 'http_errors' => false]);
+            $response = $client->post($webhook->url, [
+                'json' => $payload,
+                'headers' => [
+                    'X-Signature-SHA256' => $signature,
+                    'X-Event-Name' => 'test.ping',
+                    'Content-Type' => 'application/json',
+                ],
+            ]);
+            $statusCode = $response->getStatusCode();
+            $body = (string) $response->getBody();
+        } catch (\Throwable $e) {
+            $statusCode = 0;
+            $body = 'Gagal menghubungi endpoint: ' . $e->getMessage();
+        }
+
+        return ApiResponse::success([
+            'status_code' => $statusCode,
+            'response' => Str::limit($body, 500),
+            'dispatched_at' => now()->toIso8601String(),
+            'event' => 'test.ping',
+            'url' => $webhook->url,
+        ], 'Test ping selesai diproses');
     }
 }

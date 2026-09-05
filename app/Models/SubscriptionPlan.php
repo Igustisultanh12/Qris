@@ -27,6 +27,15 @@ class SubscriptionPlan extends Model
         'sort_order',
     ];
 
+    protected $appends = [
+        'rate_limit_rpm',
+    ];
+
+    public function getRateLimitRpmAttribute(): int
+    {
+        return (int) ($this->rate_limit_per_minute ?? 60);
+    }
+
     protected function casts(): array
     {
         return [
@@ -34,6 +43,7 @@ class SubscriptionPlan extends Model
             'features' => 'array',
             'is_active' => 'boolean',
             'is_popular' => 'boolean',
+            'rate_limit_per_minute' => 'integer',
         ];
     }
 

@@ -63,10 +63,10 @@ class ApiKey extends Model
         ?string $ipWhitelist = null,
         ?\DateTimeInterface $expiresAt = null
     ): array {
-        $keyPrefix = 'ka_live_';
+        $keyPrefix = 'qmis_live_';
         $randomKey = Str::random(24);
         $plainKey = $keyPrefix . $randomKey;
-        $plainSecret = 'kas_' . Str::random(32);
+        $plainSecret = 'qmis_sec_' . Str::random(32);
 
         $apiKey = static::create([
             'customer_id' => $customer->id,

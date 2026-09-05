@@ -66,16 +66,16 @@
                   {{ key.key_prefix }}••••••••
                 </td>
                 <td class="py-3.5 px-4 text-xs text-slate-600 dark:text-slate-400">
-                  <span class="font-bold text-slate-900 dark:text-white">{{ key.rate_limit_rpm }}</span> rpm
+                  <span class="font-bold text-slate-900 dark:text-white">{{ key.rate_limit_rpm || key.rate_limit_per_minute || 60 }}</span> rpm
                 </td>
                 <td class="py-3.5 px-4">
                   <span
                     :class="[
                       'px-2 py-0.5 rounded-full text-xs font-semibold',
-                      key.status === 'active' ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400' : 'bg-rose-100 text-rose-700'
+                      (key.status === 'active' || key.is_active) ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400' : 'bg-rose-100 text-rose-700'
                     ]"
                   >
-                    {{ key.status }}
+                    {{ (key.status === 'active' || key.is_active) ? 'Aktif' : 'Nonaktif' }}
                   </span>
                 </td>
                 <td class="py-3.5 px-4 text-xs text-slate-500">
@@ -252,7 +252,8 @@ const fetchKeys = async () => {
   loading.value = true;
   try {
     const res = await api.get('/customer/api-keys');
-    apiKeys.value = res.data.data;
+    const raw = res.data.data;
+    apiKeys.value = Array.isArray(raw) ? raw : (raw?.data || []);
   } catch (err) {
     console.error('Failed to load API keys:', err);
   } finally {

@@ -18,7 +18,12 @@ class ApiKeyController extends Controller
         $keys = $customer->apiKeys()
             ->withCount('usageLogs')
             ->latest()
-            ->get();
+            ->get()
+            ->map(function ($k) {
+                $k->status = $k->is_active ? 'active' : 'inactive';
+                $k->rate_limit_rpm = $k->rate_limit_per_minute;
+                return $k;
+            });
 
         return ApiResponse::success($keys);
     }
@@ -29,20 +34,26 @@ class ApiKeyController extends Controller
 
         $validator = Validator::make($request->all(), [
             'name' => ['required', 'string', 'max:100'],
-            'ip_whitelist' => ['nullable', 'string'],
-            'rate_limit_per_minute' => ['nullable', 'integer', 'min:10', 'max:1000'],
+            'ip_whitelist' => ['nullable'],
+            'rate_limit_per_minute' => ['nullable', 'integer', 'min:10', 'max:5000'],
+            'rate_limit_rpm' => ['nullable', 'integer', 'min:10', 'max:5000'],
         ]);
 
         if ($validator->fails()) {
             return ApiResponse::error('Validation failed', $validator->errors(), 422);
         }
 
-        $rateLimit = $request->input('rate_limit_per_minute', 60);
+        $rateLimit = (int) ($request->input('rate_limit_per_minute') ?? $request->input('rate_limit_rpm', 60));
+        $ipWhitelist = $request->input('ip_whitelist');
+        if (is_array($ipWhitelist)) {
+            $ipWhitelist = implode(',', array_filter(array_map('trim', $ipWhitelist)));
+        }
+
         $pair = ApiKey::generate(
             customer: $customer,
             name: $request->input('name'),
             rateLimit: $rateLimit,
-            ipWhitelist: $request->input('ip_whitelist')
+            ipWhitelist: $ipWhitelist
         );
 
         AuditLog::record(
@@ -53,9 +64,11 @@ class ApiKeyController extends Controller
         );
 
         return ApiResponse::success([
-            'api_key' => $pair['api_key'],
+            'api_key' => $pair['plain_key'],
+            'api_secret' => $pair['plain_secret'],
             'plain_key' => $pair['plain_key'],
             'plain_secret' => $pair['plain_secret'],
+            'key_record' => $pair['api_key'],
             'warning' => 'Please save your API key and secret now. The secret will NEVER be displayed again.',
         ], 'API Key generated successfully', [], 201);
     }

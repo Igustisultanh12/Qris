@@ -248,7 +248,8 @@ const fetchWebhooks = async () => {
   loading.value = true;
   try {
     const res = await api.get('/customer/webhooks');
-    webhooks.value = res.data.data;
+    const raw = res.data.data;
+    webhooks.value = Array.isArray(raw) ? raw : (raw?.data || []);
   } catch (err) {
     console.error('Failed to load webhooks:', err);
   } finally {

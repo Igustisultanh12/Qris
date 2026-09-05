@@ -38,6 +38,21 @@ class Transaction extends Model
         'metadata',
     ];
 
+    protected $appends = [
+        'fee_amount',
+        'total_amount',
+    ];
+
+    public function getFeeAmountAttribute(): int
+    {
+        return (int) ($this->fee ?? 0);
+    }
+
+    public function getTotalAmountAttribute(): int
+    {
+        return (int) ($this->total ?? $this->amount ?? 0);
+    }
+
     protected function casts(): array
     {
         return [

@@ -12,23 +12,24 @@
 
     <!-- QR Code Display Box -->
     <div id="qris-print-area" class="bg-white p-4 rounded-2xl shadow-md border-2 border-slate-900 dark:border-slate-700 max-w-[280px] w-full aspect-square flex items-center justify-center">
-      <div v-if="svgRaw" class="w-full h-full [&>svg]:w-full [&>svg]:h-full" v-html="svgRaw"></div>
-      <img v-else-if="qrImage" :src="qrImage" alt="Dynamic QRIS" class="w-full h-full object-contain" />
+      <div v-if="resolvedSvg" class="w-full h-full [&>svg]:w-full [&>svg]:h-full" v-html="resolvedSvg"></div>
+      <img v-else-if="resolvedImage" :src="resolvedImage" alt="Dynamic QRIS" class="w-full h-full object-contain" />
+      <div v-else class="text-xs text-slate-400">QR Code memuat...</div>
     </div>
 
     <!-- Amount & Breakdown -->
     <div class="mt-4 w-full bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4 text-left text-sm border border-slate-100 dark:border-slate-800">
       <div class="flex justify-between py-1">
         <span class="text-slate-500">Nominal Transaksi</span>
-        <span class="font-medium text-slate-900 dark:text-white">Rp {{ amount.toLocaleString('id-ID') }}</span>
+        <span class="font-medium text-slate-900 dark:text-white">Rp {{ (amount || 0).toLocaleString('id-ID') }}</span>
       </div>
-      <div v-if="fee > 0" class="flex justify-between py-1">
+      <div v-if="(fee || 0) > 0" class="flex justify-between py-1">
         <span class="text-slate-500">Biaya Layanan</span>
-        <span class="font-medium text-slate-900 dark:text-white">Rp {{ fee.toLocaleString('id-ID') }}</span>
+        <span class="font-medium text-slate-900 dark:text-white">Rp {{ (fee || 0).toLocaleString('id-ID') }}</span>
       </div>
       <div class="flex justify-between py-2 border-t border-slate-200 dark:border-slate-700 mt-1 font-bold text-base text-indigo-600 dark:text-indigo-400">
         <span>Total Bayar</span>
-        <span>Rp {{ total.toLocaleString('id-ID') }}</span>
+        <span>Rp {{ (resolvedTotal || 0).toLocaleString('id-ID') }}</span>
       </div>
       <div v-if="reference" class="text-xs text-slate-400 mt-1">
         Ref: <span class="font-mono">{{ reference }}</span>
@@ -90,26 +91,59 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue';
 import { useToastStore } from '../stores/toast';
 
-const props = defineProps<{
-  merchantName: string;
-  merchantCity: string;
-  mcc?: string;
-  amount: number;
-  fee: number;
-  total: number;
-  reference?: string;
-  qrisPayload: string;
-  svgRaw?: string;
-  qrImage?: string;
-}>();
+const props = withDefaults(
+  defineProps<{
+    merchantName?: string;
+    merchantCity?: string;
+    mcc?: string;
+    amount?: number;
+    fee?: number;
+    total?: number;
+    reference?: string;
+    qrisPayload?: string;
+    qrisString?: string;
+    svgRaw?: string;
+    svgContent?: string;
+    qrImage?: string;
+    pngDataUri?: string;
+  }>(),
+  {
+    merchantName: 'Merchant',
+    merchantCity: 'Indonesia',
+    mcc: '5411',
+    amount: 0,
+    fee: 0,
+    total: 0,
+    reference: '',
+    qrisPayload: '',
+    qrisString: '',
+    svgRaw: '',
+    svgContent: '',
+    qrImage: '',
+    pngDataUri: '',
+  }
+);
 
 const toast = useToastStore();
 
+const resolvedPayload = computed(() => props.qrisPayload || props.qrisString || '');
+const resolvedSvg = computed(() => props.svgRaw || props.svgContent || '');
+const resolvedImage = computed(() => props.qrImage || props.pngDataUri || '');
+const resolvedTotal = computed(() => {
+  if (props.total && props.total > 0) return props.total;
+  return (props.amount || 0) + (props.fee || 0);
+});
+
 const copyPayload = async () => {
+  if (!resolvedPayload.value) {
+    toast.error('String QRIS kosong');
+    return;
+  }
   try {
-    await navigator.clipboard.writeText(props.qrisPayload);
+    await navigator.clipboard.writeText(resolvedPayload.value);
     toast.success('Disalin ke Clipboard', 'String QRIS dynamic berhasil disalin.');
   } catch {
     toast.error('Gagal Menyalin');
@@ -117,8 +151,11 @@ const copyPayload = async () => {
 };
 
 const downloadSvg = () => {
-  if (!props.svgRaw) return;
-  const blob = new Blob([props.svgRaw], { type: 'image/svg+xml' });
+  if (!resolvedSvg.value) {
+    toast.error('Data SVG tidak tersedia');
+    return;
+  }
+  const blob = new Blob([resolvedSvg.value], { type: 'image/svg+xml' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
@@ -128,15 +165,15 @@ const downloadSvg = () => {
 };
 
 const downloadPng = () => {
-  if (props.qrImage) {
+  if (resolvedImage.value) {
     const a = document.createElement('a');
-    a.href = props.qrImage;
+    a.href = resolvedImage.value;
     a.download = `qris-${props.reference || 'dynamic'}.png`;
     a.click();
-  } else if (props.svgRaw) {
+  } else if (resolvedSvg.value) {
     // Convert SVG to PNG on canvas
     const img = new Image();
-    const svgBlob = new Blob([props.svgRaw], { type: 'image/svg+xml;charset=utf-8' });
+    const svgBlob = new Blob([resolvedSvg.value], { type: 'image/svg+xml;charset=utf-8' });
     const url = URL.createObjectURL(svgBlob);
 
     img.onload = () => {
@@ -157,6 +194,8 @@ const downloadPng = () => {
       URL.revokeObjectURL(url);
     };
     img.src = url;
+  } else {
+    toast.error('Data gambar QRIS tidak tersedia');
   }
 };
 

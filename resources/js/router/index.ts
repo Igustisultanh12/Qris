@@ -38,19 +38,40 @@ const routes: RouteRecordRaw[] = [
   { path: '/api-docs', name: 'api-docs', component: ApiDocsView },
   { path: '/legal', name: 'legal', component: LegalView },
 
+  // Terms & Privacy Aliases
+  { path: '/terms', redirect: '/legal' },
+  { path: '/privacy', redirect: '/legal' },
+
   // Auth
   { path: '/login', name: 'login', component: LoginView, meta: { guestOnly: true } },
   { path: '/register', name: 'register', component: RegisterView, meta: { guestOnly: true } },
 
-  // Customer Portal
+  // Customer Portal (Supports both /path and /customer/path for maximum compatibility)
   { path: '/dashboard', name: 'customer-dashboard', component: CustomerDashboardView, meta: { requiresAuth: true } },
+
+  { path: '/generator', component: CustomerGeneratorView, meta: { requiresAuth: true } },
   { path: '/customer/generator', name: 'customer-generator', component: CustomerGeneratorView, meta: { requiresAuth: true } },
+
+  { path: '/merchants', component: CustomerMerchantsView, meta: { requiresAuth: true } },
   { path: '/customer/merchants', name: 'customer-merchants', component: CustomerMerchantsView, meta: { requiresAuth: true } },
+
+  { path: '/transactions', component: CustomerTransactionsView, meta: { requiresAuth: true } },
   { path: '/customer/transactions', name: 'customer-transactions', component: CustomerTransactionsView, meta: { requiresAuth: true } },
+
+  { path: '/api-credentials', component: CustomerApiKeysView, meta: { requiresAuth: true } },
+  { path: '/api-keys', component: CustomerApiKeysView, meta: { requiresAuth: true } },
   { path: '/customer/api-keys', name: 'customer-api-keys', component: CustomerApiKeysView, meta: { requiresAuth: true } },
+
+  { path: '/webhooks', component: CustomerWebhooksView, meta: { requiresAuth: true } },
   { path: '/customer/webhooks', name: 'customer-webhooks', component: CustomerWebhooksView, meta: { requiresAuth: true } },
+
+  { path: '/billing', component: CustomerBillingView, meta: { requiresAuth: true } },
   { path: '/customer/billing', name: 'customer-billing', component: CustomerBillingView, meta: { requiresAuth: true } },
+
+  { path: '/tickets', component: CustomerTicketsView, meta: { requiresAuth: true } },
   { path: '/customer/tickets', name: 'customer-tickets', component: CustomerTicketsView, meta: { requiresAuth: true } },
+
+  { path: '/profile', component: CustomerProfileView, meta: { requiresAuth: true } },
   { path: '/customer/profile', name: 'customer-profile', component: CustomerProfileView, meta: { requiresAuth: true } },
 
   // Admin Portal

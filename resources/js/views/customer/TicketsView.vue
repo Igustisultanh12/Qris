@@ -227,7 +227,8 @@ const fetchTickets = async () => {
   loading.value = true;
   try {
     const res = await api.get('/tickets');
-    tickets.value = res.data.data;
+    const raw = res.data.data;
+    tickets.value = Array.isArray(raw) ? raw : (raw?.data || []);
   } catch (err) {
     console.error('Failed to load tickets:', err);
   } finally {

@@ -31,6 +31,17 @@ class Merchant extends Model
         'custom_fee_value',
     ];
 
+    protected static function boot(): void
+    {
+        parent::boot();
+
+        static::creating(function ($merchant) {
+            if (empty($merchant->merchant_code)) {
+                $merchant->merchant_code = 'MC-' . strtoupper(\Illuminate\Support\Str::random(8));
+            }
+        });
+    }
+
     protected function casts(): array
     {
         return [
@@ -39,6 +50,11 @@ class Merchant extends Model
     }
 
     public function qrisList(): HasMany
+    {
+        return $this->hasMany(MerchantQris::class);
+    }
+
+    public function qrisConfigs(): HasMany
     {
         return $this->hasMany(MerchantQris::class);
     }

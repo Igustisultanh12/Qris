@@ -154,18 +154,28 @@
 
           <!-- QRIS Static Input & Scanner -->
           <div class="space-y-3 pt-2">
-            <div class="flex items-center justify-between">
+            <div class="flex flex-wrap items-center justify-between gap-2">
               <label class="block text-xs font-bold text-slate-900 dark:text-white">
                 String QRIS Statis (EMVCo Tag 01=11)
               </label>
-              <button
-                type="button"
-                @click="showScanner = !showScanner"
-                class="text-xs font-semibold text-primary-600 dark:text-primary-400 hover:underline flex items-center gap-1"
-              >
-                <Camera class="w-3.5 h-3.5" />
-                <span>{{ showScanner ? 'Tutup Scanner' : 'Pindai Kamera / Upload Gambar' }}</span>
-              </button>
+              <div class="flex items-center gap-3">
+                <button
+                  type="button"
+                  @click="fillSampleQris"
+                  class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1"
+                >
+                  <Sparkles class="w-3.5 h-3.5" />
+                  <span>Gunakan Contoh QRIS Statis</span>
+                </button>
+                <button
+                  type="button"
+                  @click="showScanner = !showScanner"
+                  class="text-xs font-semibold text-primary-600 dark:text-primary-400 hover:underline flex items-center gap-1"
+                >
+                  <Camera class="w-3.5 h-3.5" />
+                  <span>{{ showScanner ? 'Tutup Scanner' : 'Pindai Kamera / Upload Gambar' }}</span>
+                </button>
+              </div>
             </div>
 
             <!-- Embedded Scanner Component -->
@@ -233,6 +243,7 @@ import {
   Loader2,
   CheckCircle,
   AlertCircle,
+  Sparkles,
 } from 'lucide-vue-next';
 
 const toast = useToastStore();
@@ -247,16 +258,26 @@ const validationResult = ref<any>(null);
 const newMerchant = reactive({
   name: '',
   store_name: '',
-  city: 'JAKARTA',
-  postal_code: '12190',
+  city: 'JAKARTA PUSAT',
+  postal_code: '10110',
   qris_static: '',
 });
+
+const fillSampleQris = () => {
+  newMerchant.qris_static = '00020101021126620014ID.LINKAJA.WWW01189360091100220945610211000000000010303UMI51440014ID.CO.QRIS.WWW0215ID10200210000010303UMI5204541153033605802ID5923KREATIF SKY ABADI STORE6013JAKARTA PUSAT61051011062070703A0163046155';
+  newMerchant.name = 'Kreatif Sky Abadi Store';
+  newMerchant.store_name = 'Kantor Pusat Jakarta';
+  newMerchant.city = 'JAKARTA PUSAT';
+  newMerchant.postal_code = '10110';
+  validateStaticInput();
+};
 
 const fetchMerchants = async () => {
   loading.value = true;
   try {
     const res = await api.get('/customer/merchants');
-    merchants.value = res.data.data;
+    const raw = res.data.data;
+    merchants.value = Array.isArray(raw) ? raw : (raw?.data || []);
   } catch (err) {
     console.error('Failed to fetch merchants:', err);
   } finally {
@@ -284,12 +305,15 @@ const validateStaticInput = async () => {
   }
   try {
     const res = await api.post('/customer/qris/validate-static', { qris: newMerchant.qris_static });
-    validationResult.value = { valid: true, data: res.data.data?.data };
-    if (res.data.data?.data?.merchant_name && !newMerchant.name) {
-      newMerchant.name = res.data.data.data.merchant_name;
+    const parsedData = res.data.data?.data || res.data.data?.parsed || res.data.data;
+    validationResult.value = { valid: true, data: parsedData };
+    const mName = res.data.data?.merchant_name || parsedData?.merchant_name;
+    const mCity = res.data.data?.merchant_city || parsedData?.merchant_city;
+    if (mName && !newMerchant.name) {
+      newMerchant.name = mName;
     }
-    if (res.data.data?.data?.merchant_city && !newMerchant.city) {
-      newMerchant.city = res.data.data.data.merchant_city;
+    if (mCity && (!newMerchant.city || newMerchant.city === 'JAKARTA PUSAT')) {
+      newMerchant.city = mCity;
     }
   } catch (err: any) {
     validationResult.value = {

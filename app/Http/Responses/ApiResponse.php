@@ -23,6 +23,29 @@ class ApiResponse
         ], $statusCode)->header('X-Request-ID', $requestId);
     }
 
+    public static function paginated(
+        mixed $paginator,
+        string $message = 'Success',
+        int $statusCode = 200
+    ): JsonResponse {
+        $requestId = request()->header('X-Request-ID') ?? (string) \Illuminate\Support\Str::uuid();
+
+        return response()->json([
+            'success' => true,
+            'message' => $message,
+            'data' => $paginator->items(),
+            'meta' => [
+                'current_page' => $paginator->currentPage(),
+                'last_page' => $paginator->lastPage(),
+                'per_page' => $paginator->perPage(),
+                'total' => $paginator->total(),
+                'from' => $paginator->firstItem(),
+                'to' => $paginator->lastItem(),
+            ],
+            'request_id' => $requestId,
+        ], $statusCode)->header('X-Request-ID', $requestId);
+    }
+
     public static function error(
         string $message = 'An error occurred',
         mixed $errors = null,

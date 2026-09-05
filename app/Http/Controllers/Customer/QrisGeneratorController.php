@@ -34,10 +34,15 @@ class QrisGeneratorController extends Controller
         }
 
         $parsed = $this->converter->parse($qrisString);
+        $arr = $parsed->toArray();
 
         return ApiResponse::success([
             'valid' => true,
-            'data' => $parsed->toArray(),
+            'data' => $arr,
+            'parsed' => $arr,
+            'merchant_name' => $parsed->merchantName,
+            'merchant_city' => $parsed->merchantCity,
+            'postal_code' => $parsed->postalCode,
         ], 'QRIS static valid');
     }
 
@@ -99,9 +104,35 @@ class QrisGeneratorController extends Controller
             $svgString = QrisGenerator::generateSvg($transaction->qris_dynamic);
             $pngDataUri = QrisGenerator::generatePngDataUri($transaction->qris_dynamic);
 
-            $data = (new TransactionResource($transaction))->resolve();
-            $data['svg_raw'] = $svgString;
-            $data['qr_base64'] = $pngDataUri;
+            $resourceData = (new TransactionResource($transaction))->resolve();
+            $data = array_merge($resourceData, [
+                'transaction' => array_merge($resourceData, [
+                    'id' => $transaction->id,
+                    'uuid' => $transaction->uuid,
+                    'amount' => $transaction->amount,
+                    'fee_amount' => $transaction->fee,
+                    'total_amount' => $transaction->total,
+                    'reference' => $transaction->reference,
+                    'expires_at' => $transaction->expires_at?->toIso8601String(),
+                    'merchant' => [
+                        'name' => $merchant->name,
+                        'city' => $merchant->city,
+                        'code' => $merchant->merchant_code,
+                    ],
+                ]),
+                'qris_dynamic' => $transaction->qris_dynamic,
+                'qris_string' => $transaction->qris_dynamic,
+                'qr_svg' => $svgString,
+                'svg_raw' => $svgString,
+                'qr_png' => $pngDataUri,
+                'qr_base64' => $pngDataUri,
+                'fee_amount' => $transaction->fee,
+                'total_amount' => $transaction->total,
+                'parsed' => [
+                    'merchant_name' => $merchant->name,
+                    'merchant_city' => $merchant->city,
+                ],
+            ]);
 
             return ApiResponse::success($data, 'Dynamic QRIS generated successfully', [], 201);
         } catch (\Illuminate\Validation\ValidationException $e) {

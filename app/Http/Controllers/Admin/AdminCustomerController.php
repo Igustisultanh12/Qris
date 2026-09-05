@@ -69,26 +69,50 @@ class AdminCustomerController extends Controller
     public function updateSubscription(Request $request, string $id): JsonResponse
     {
         $customer = Customer::where(fn ($q) => $q->where('uuid', $id)->orWhere('id', $id))->firstOrFail();
+        $planId = $request->input('plan_id');
         $planSlug = $request->input('plan_slug');
-        $plan = SubscriptionPlan::where('slug', $planSlug)->firstOrFail();
 
-        $sub = $customer->activeSubscription;
-        if ($sub) {
-            $sub->update([
-                'plan_id' => $plan->id,
-                'price' => $plan->price,
-                'status' => 'active',
-                'ends_at' => now()->addMonths(1),
-            ]);
+        $plan = SubscriptionPlan::where(function ($q) use ($planId, $planSlug) {
+            if ($planId) {
+                $q->where('id', $planId);
+            }
+            if ($planSlug) {
+                $q->orWhere('slug', $planSlug);
+            }
+        })->first();
+
+        if (!$plan && ($planId || $planSlug)) {
+            return ApiResponse::error('Subscription plan not found', null, 404);
         }
 
-        $customer->update(['max_merchants' => $plan->max_merchants]);
+        if ($plan) {
+            $sub = $customer->activeSubscription;
+            if ($sub) {
+                $sub->update([
+                    'plan_id' => $plan->id,
+                    'price' => $plan->price,
+                    'status' => 'active',
+                    'ends_at' => now()->addMonths(1),
+                ]);
+            } else {
+                $customer->subscriptions()->create([
+                    'plan_id' => $plan->id,
+                    'price' => $plan->price,
+                    'status' => 'active',
+                    'starts_at' => now(),
+                    'ends_at' => now()->addMonths(1),
+                ]);
+            }
+        }
+
+        $maxMerchants = $request->input('max_merchants', $plan?->max_merchants ?? $customer->max_merchants);
+        $customer->update(['max_merchants' => $maxMerchants]);
 
         AuditLog::record(
             action: 'customer.subscription_changed',
             entity: 'Customer',
             entityId: (string) $customer->id,
-            newValues: ['plan' => $plan->name]
+            newValues: ['plan' => $plan?->name, 'max_merchants' => $maxMerchants]
         );
 
         return ApiResponse::success($customer->load('activeSubscription.plan'), 'Customer subscription updated');

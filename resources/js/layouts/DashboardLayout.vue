@@ -58,7 +58,7 @@
             to="/generator"
             @click="sidebarOpen = false"
             class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors"
-            :class="$route.path === '/generator' ? 'bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60'"
+            :class="($route.path === '/generator' || $route.path === '/customer/generator') ? 'bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 font-semibold' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60'"
           >
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -71,7 +71,7 @@
             to="/merchants"
             @click="sidebarOpen = false"
             class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors"
-            :class="$route.path.startsWith('/merchants') ? 'bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60'"
+            :class="($route.path.startsWith('/merchants') || $route.path.startsWith('/customer/merchants')) ? 'bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 font-semibold' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60'"
           >
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
@@ -83,7 +83,7 @@
             to="/transactions"
             @click="sidebarOpen = false"
             class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors"
-            :class="$route.path === '/transactions' ? 'bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60'"
+            :class="($route.path.startsWith('/transactions') || $route.path.startsWith('/customer/transactions')) ? 'bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 font-semibold' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60'"
           >
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
@@ -95,7 +95,7 @@
             to="/api-credentials"
             @click="sidebarOpen = false"
             class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors"
-            :class="$route.path === '/api-credentials' ? 'bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60'"
+            :class="($route.path.startsWith('/api-credentials') || $route.path.startsWith('/api-keys') || $route.path.startsWith('/customer/api-keys')) ? 'bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 font-semibold' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60'"
           >
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
@@ -107,7 +107,7 @@
             to="/webhooks"
             @click="sidebarOpen = false"
             class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors"
-            :class="$route.path === '/webhooks' ? 'bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60'"
+            :class="($route.path.startsWith('/webhooks') || $route.path.startsWith('/customer/webhooks')) ? 'bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 font-semibold' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60'"
           >
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -119,7 +119,7 @@
             to="/billing"
             @click="sidebarOpen = false"
             class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors"
-            :class="$route.path === '/billing' ? 'bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60'"
+            :class="($route.path.startsWith('/billing') || $route.path.startsWith('/customer/billing')) ? 'bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 font-semibold' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60'"
           >
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
@@ -131,7 +131,7 @@
             to="/tickets"
             @click="sidebarOpen = false"
             class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors"
-            :class="$route.path.startsWith('/tickets') ? 'bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60'"
+            :class="($route.path.startsWith('/tickets') || $route.path.startsWith('/customer/tickets')) ? 'bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 font-semibold' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60'"
           >
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
@@ -144,15 +144,15 @@
       <!-- Bottom User Section -->
       <div class="p-4 border-t border-slate-100 dark:border-slate-800">
         <div class="flex items-center justify-between mb-3">
-          <div class="flex items-center gap-2 overflow-hidden">
-            <div class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center font-bold text-xs text-slate-700 dark:text-slate-200 shrink-0">
+          <router-link to="/profile" class="flex items-center gap-2 overflow-hidden hover:opacity-80 transition-opacity" title="Lihat Profil">
+            <div class="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 flex items-center justify-center font-bold text-xs shrink-0">
               {{ authStore.user?.name?.charAt(0) || 'U' }}
             </div>
             <div class="truncate">
               <p class="text-xs font-bold text-slate-900 dark:text-white truncate">{{ authStore.user?.name }}</p>
               <p class="text-[10px] text-slate-400 truncate">{{ authStore.user?.email }}</p>
             </div>
-          </div>
+          </router-link>
 
           <button
             @click="themeStore.toggle"

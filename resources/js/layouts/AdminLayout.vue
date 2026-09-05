@@ -17,9 +17,9 @@
 
         <nav class="p-3 space-y-1 text-xs font-semibold">
           <router-link
-            to="/admin"
+            to="/admin/dashboard"
             class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors"
-            :class="$route.path === '/admin' ? 'bg-red-600/20 text-red-400 border border-red-500/30' : 'text-slate-400 hover:bg-slate-900'"
+            :class="($route.path === '/admin/dashboard' || $route.path === '/admin') ? 'bg-red-600/20 text-red-400 border border-red-500/30' : 'text-slate-400 hover:bg-slate-900'"
           >
             <span>Overview & Monitoring</span>
           </router-link>
