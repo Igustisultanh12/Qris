@@ -1,0 +1,259 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "PT Kreatif Abadi QRIS Platform API",
+    "description": "Production-grade REST API platform for converting static QRIS to dynamic QRIS with nominal amount, service fees, high-resolution rendering, and real-time transaction tracking.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "PT Kreatif Abadi Developer Support",
+      "email": "support@kreatifabadi.co.id",
+      "url": "https://kreatifabadi.co.id"
+    }
+  },
+  "servers": [
+    {
+      "url": "/api/v1",
+      "description": "Production API v1"
+    }
+  ],
+  "security": [
+    {
+      "ApiKeyAuth": []
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "ApiKeyAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "API Key",
+        "description": "Use `Authorization: Bearer <YOUR_API_KEY>` or header `X-API-Key: <YOUR_API_KEY>`"
+      }
+    },
+    "schemas": {
+      "StandardResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean", "example": true },
+          "message": { "type": "string", "example": "Success" },
+          "data": { "type": "object" },
+          "meta": { "type": "object" },
+          "request_id": { "type": "string", "example": "8f5bb7e2-cf29-4d64-bce2-6b94e339b6b7" }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean", "example": false },
+          "message": { "type": "string", "example": "Validation failed" },
+          "errors": { "type": "object" },
+          "request_id": { "type": "string", "example": "8f5bb7e2-cf29-4d64-bce2-6b94e339b6b7" }
+        }
+      },
+      "DynamicQrisRequest": {
+        "type": "object",
+        "required": ["merchant_id", "amount", "reference"],
+        "properties": {
+          "merchant_id": { "type": "string", "example": "MC-KREATIF-001", "description": "Merchant UUID or Merchant Code" },
+          "amount": { "type": "integer", "example": 50000, "description": "Transaction nominal in IDR" },
+          "reference": { "type": "string", "example": "ORDER-12345", "description": "Client order / invoice reference" },
+          "fee_type": { "type": "string", "enum": ["none", "fixed", "percentage"], "example": "fixed" },
+          "fee_value": { "type": "number", "example": 1000 },
+          "fee_mode": { "type": "string", "enum": ["absorbed", "charged_to_customer"], "example": "charged_to_customer" },
+          "expiry_minutes": { "type": "integer", "example": 15 }
+        }
+      },
+      "TransactionData": {
+        "type": "object",
+        "properties": {
+          "transaction_id": { "type": "string", "example": "TRX-20260905-A1B2C3D4" },
+          "uuid": { "type": "string", "example": "e5b8d234-927b-4bc2-b883-9b85c1556aa2" },
+          "reference": { "type": "string", "example": "ORDER-12345" },
+          "merchant_id": { "type": "string", "example": "MC-KREATIF-001" },
+          "amount": { "type": "integer", "example": 50000 },
+          "fee": { "type": "integer", "example": 1000 },
+          "total": { "type": "integer", "example": 51000 },
+          "fee_mode": { "type": "string", "example": "charged_to_customer" },
+          "qris_string": { "type": "string", "example": "000201010212..." },
+          "qr_image_url": { "type": "string", "example": "https://domain.com/storage/qris/2026/09/qr_12345.svg" },
+          "status": { "type": "string", "enum": ["generated", "paid", "expired", "cancelled", "failed"], "example": "generated" },
+          "expires_at": { "type": "string", "format": "date-time" },
+          "created_at": { "type": "string", "format": "date-time" }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/health": {
+      "get": {
+        "summary": "Health Check",
+        "description": "Check application, database, cache, and storage health status.",
+        "security": [],
+        "responses": {
+          "200": { "description": "System operational" }
+        }
+      }
+    },
+    "/qris/parse": {
+      "post": {
+        "summary": "Parse QRIS Payload",
+        "description": "Decode and parse a raw QRIS payload into structured EMVCo/ASPI metadata.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["qris"],
+                "properties": {
+                  "qris": { "type": "string", "example": "00020101021126..." }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "QRIS parsed successfully" },
+          "422": { "description": "Invalid payload format" }
+        }
+      }
+    },
+    "/qris/validate": {
+      "post": {
+        "summary": "Validate QRIS",
+        "description": "Validate QRIS format, mandatory tags, and CRC16-CCITT checksum.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["qris"],
+                "properties": {
+                  "qris": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "QRIS is valid" },
+          "422": { "description": "Validation failed with details" }
+        }
+      }
+    },
+    "/qris/dynamic": {
+      "post": {
+        "summary": "Create Dynamic QRIS",
+        "description": "Convert merchant static QRIS into a dynamic QRIS payload with specified amount and fees.",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "description": "Unique client-generated idempotency key to prevent duplicate transaction creation",
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/DynamicQrisRequest" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Dynamic QRIS created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/StandardResponse" },
+                    {
+                      "properties": {
+                        "data": { "$ref": "#/components/schemas/TransactionData" }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "422": { "description": "Validation error" },
+          "429": { "description": "Rate limit exceeded" }
+        }
+      }
+    },
+    "/qris/{id}": {
+      "get": {
+        "summary": "Get QRIS Details",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "QRIS details returned" },
+          "404": { "description": "Transaction not found" }
+        }
+      }
+    },
+    "/qris/{id}/cancel": {
+      "post": {
+        "summary": "Cancel Dynamic QRIS",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Transaction cancelled successfully" },
+          "422": { "description": "Cannot cancel non-pending transaction" }
+        }
+      }
+    },
+    "/transactions": {
+      "get": {
+        "summary": "List Transactions",
+        "parameters": [
+          { "name": "page", "in": "query", "schema": { "type": "integer" } },
+          { "name": "per_page", "in": "query", "schema": { "type": "integer" } },
+          { "name": "status", "in": "query", "schema": { "type": "string" } },
+          { "name": "reference", "in": "query", "schema": { "type": "string" } },
+          { "name": "search", "in": "query", "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "List of transactions" }
+        }
+      }
+    },
+    "/transactions/{id}": {
+      "get": {
+        "summary": "Get Transaction Details",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Transaction details returned" }
+        }
+      }
+    },
+    "/merchants": {
+      "get": {
+        "summary": "List Merchants",
+        "responses": {
+          "200": { "description": "List of customer merchants" }
+        }
+      }
+    },
+    "/merchants/{id}": {
+      "get": {
+        "summary": "Get Merchant Detail",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Merchant detail" }
+        }
+      }
+    }
+  }
+}
