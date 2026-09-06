@@ -94,4 +94,34 @@ class CustomerTransactionController extends Controller
 
         return ApiResponse::success($transaction, 'Transaction cancelled successfully');
     }
+
+    public function simulatePaid(Request $request, string $id): JsonResponse
+    {
+        $customer = $request->user()->customer;
+        $transaction = $customer->transactions()
+            ->where(fn ($q) => $q->where('id', $id)->orWhere('uuid', $id)->orWhere('reference', $id))
+            ->first();
+
+        if (!$transaction) {
+            return ApiResponse::error('Transaction not found', null, 404);
+        }
+
+        if ($transaction->status === 'paid') {
+            return ApiResponse::success($transaction, 'Transaksi sudah berstatus lunas');
+        }
+
+        if (in_array($transaction->status, ['cancelled', 'expired'], true)) {
+            return ApiResponse::error("Tidak dapat membayar transaksi berstatus '{$transaction->status}'", null, 422);
+        }
+
+        $paymentRef = 'SIM-WEB-' . strtoupper(\Illuminate\Support\Str::random(10));
+        $transactionService = app(\App\Services\Transaction\TransactionService::class);
+        $transaction = $transactionService->markAsPaid(
+            $transaction,
+            $paymentRef,
+            ['simulated' => true, 'source' => 'web_portal', 'paid_at' => now()->toIso8601String()]
+        );
+
+        return ApiResponse::success($transaction, 'Simulasi pembayaran sukses! Status transaksi kini LUNAS (PAID) dan webhook notifikasi telah dikirim.');
+    }
 }

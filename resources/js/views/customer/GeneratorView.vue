@@ -66,9 +66,43 @@
               </div>
               <div class="py-2.5 flex justify-between items-center">
                 <span class="text-slate-500">Status Pembayaran</span>
-                <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300">
-                  GENERATED (Menunggu Bayar)
+                <span
+                  :class="[
+                    'px-2.5 py-0.5 rounded-full text-xs font-semibold',
+                    generatedResult.transaction?.status === 'paid'
+                      ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
+                      : 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300'
+                  ]"
+                >
+                  {{ (generatedResult.transaction?.status || 'GENERATED').toUpperCase() }}
                 </span>
+              </div>
+
+              <!-- Simulation & Actions -->
+              <div class="pt-4 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3">
+                <button
+                  v-if="generatedResult.transaction?.status !== 'paid'"
+                  type="button"
+                  @click="simulatePaymentNow"
+                  :disabled="simulatingPayment"
+                  class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-emerald-600/20 disabled:opacity-50"
+                >
+                  <Loader2 v-if="simulatingPayment" class="w-3.5 h-3.5 animate-spin" />
+                  <CheckCircle2 v-else class="w-4 h-4" />
+                  <span>Simulasikan Pembayaran Sukses (PAID)</span>
+                </button>
+                <div v-else class="text-xs font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
+                  <CheckCircle2 class="w-4 h-4" />
+                  <span>Pembayaran Lunas & Webhook Terkirim</span>
+                </div>
+
+                <button
+                  type="button"
+                  @click="resetForm"
+                  class="text-xs font-semibold text-primary-600 hover:text-primary-700 dark:text-primary-400 hover:underline flex items-center gap-1"
+                >
+                  <span>+ Buat QRIS Baru</span>
+                </button>
               </div>
             </div>
           </div>
@@ -308,6 +342,7 @@ import {
   RotateCcw,
   Store,
   Loader2,
+  CheckCircle2,
 } from 'lucide-vue-next';
 
 const toast = useToastStore();
@@ -316,6 +351,7 @@ const merchants = ref<any[]>([]);
 const loadingMerchants = ref(true);
 const generating = ref(false);
 const generatedResult = ref<any>(null);
+const simulatingPayment = ref(false);
 
 const form = reactive({
   merchant_id: '',
@@ -341,7 +377,8 @@ const fetchMerchants = async () => {
   loadingMerchants.value = true;
   try {
     const res = await api.get('/customer/merchants');
-    merchants.value = res.data.data;
+    const raw = res.data.data;
+    merchants.value = Array.isArray(raw) ? raw : (raw?.data || []);
     if (merchants.value.length > 0) {
       form.merchant_id = merchants.value[0].id;
     }
@@ -372,6 +409,28 @@ const generateDynamicQris = async () => {
     toast.error('Gagal Membuat QRIS', err.response?.data?.message || 'Periksa kembali parameter input.');
   } finally {
     generating.value = false;
+  }
+};
+
+const simulatePaymentNow = async () => {
+  if (!generatedResult.value) return;
+  const tx = generatedResult.value.transaction || generatedResult.value;
+  const txId = tx.uuid || tx.reference || tx.id;
+  if (!txId) return;
+
+  simulatingPayment.value = true;
+  try {
+    const res = await api.post(`/customer/transactions/${txId}/simulate-paid`);
+    if (generatedResult.value.transaction) {
+      generatedResult.value.transaction.status = 'paid';
+    } else {
+      generatedResult.value.status = 'paid';
+    }
+    toast.success('Pembayaran Dikonfirmasi!', 'Status transaksi berhasil diubah menjadi LUNAS (PAID) dan webhook telah dikirim.');
+  } catch (err: any) {
+    toast.error('Gagal Simulasi', err.response?.data?.message || 'Terjadi kesalahan.');
+  } finally {
+    simulatingPayment.value = false;
   }
 };
 

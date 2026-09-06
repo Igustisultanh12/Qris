@@ -109,6 +109,7 @@ Route::middleware(['auth:sanctum', 'assign.request.id'])->group(function () {
         Route::get('/transactions', [CustomerTransactionController::class, 'index']);
         Route::get('/transactions/{id}', [CustomerTransactionController::class, 'show']);
         Route::post('/transactions/{id}/cancel', [CustomerTransactionController::class, 'cancel']);
+        Route::post('/transactions/{id}/simulate-paid', [CustomerTransactionController::class, 'simulatePaid']);
 
         // API Keys & Webhooks
         Route::apiResource('api-keys', ApiKeyController::class);
