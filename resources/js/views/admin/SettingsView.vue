@@ -314,6 +314,111 @@
             </div>
           </div>
 
+          <!-- Google Apps Script Automation Section -->
+          <div class="p-4 rounded-xl border border-indigo-900/60 bg-gradient-to-b from-indigo-950/30 to-slate-950 space-y-3">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-indigo-900/40 pb-3">
+              <div class="flex items-center gap-2">
+                <div class="w-7 h-7 rounded-lg bg-indigo-600/20 text-indigo-400 flex items-center justify-center font-bold text-xs">
+                  GAS
+                </div>
+                <div>
+                  <h4 class="text-xs font-bold text-white flex items-center gap-2">
+                    <span>Otomatisasi Google Apps Script (Gmail Notifier)</span>
+                    <span class="px-2 py-0.5 rounded text-[9px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                      GRATIS 24 JAM
+                    </span>
+                  </h4>
+                  <p class="text-[11px] text-slate-400 mt-0.5">
+                    Membaca email bukti pembayaran masuk (ShopeePay, BCA, Mandiri, GoPay, dll) di cloud Google secara otomatis tanpa perlu HP menyala!
+                  </p>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-2 shrink-0">
+                <a
+                  href="https://script.google.com/home/start"
+                  target="_blank"
+                  class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-colors flex items-center gap-1.5"
+                >
+                  <ExternalLink class="w-3.5 h-3.5" />
+                  <span>Buka script.google.com</span>
+                </a>
+                <button
+                  type="button"
+                  @click="showGasCode = !showGasCode"
+                  class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white transition-colors flex items-center gap-1.5"
+                >
+                  <Code2 class="w-3.5 h-3.5" />
+                  <span>{{ showGasCode ? 'Tutup Script' : 'Lihat & Salin Script' }}</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Expandable Script and Guide -->
+            <div v-if="showGasCode" class="space-y-3 pt-1">
+              <!-- Step-by-step instructions -->
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-2.5 text-[11px]">
+                <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800">
+                  <div class="font-bold text-indigo-400 mb-1">1. Buat Project Baru</div>
+                  <p class="text-slate-400">Buka <a href="https://script.google.com/home/start" target="_blank" class="underline text-indigo-300">script.google.com</a>, klik <strong>+ New Project</strong>, hapus kode lama, lalu tempel kode di bawah ini.</p>
+                </div>
+                <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800">
+                  <div class="font-bold text-indigo-400 mb-1">2. Pasang Trigger Waktu</div>
+                  <p class="text-slate-400">Klik ikon jam/alarm (<strong>Triggers</strong>) di sebelah kiri &rarr; <strong>Add Trigger</strong> &rarr; pilih fungsi <code class="text-slate-200 font-mono">checkIncomingPayments</code>.</p>
+                </div>
+                <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800">
+                  <div class="font-bold text-indigo-400 mb-1">3. Atur Setiap Menit</div>
+                  <p class="text-slate-400">Pilih <em>Time-driven</em> &rarr; <em>Minutes timer</em> &rarr; <em>Every minute</em>. Klik <strong>Save</strong> dan beri izin akses akun Gmail Anda.</p>
+                </div>
+              </div>
+
+              <!-- Code Box -->
+              <div class="relative rounded-xl border border-slate-800 bg-slate-900/90 overflow-hidden">
+                <div class="flex items-center justify-between px-3.5 py-2 bg-slate-950 border-b border-slate-800 text-[11px]">
+                  <span class="font-mono text-slate-400">Code.gs &bull; Google Apps Script</span>
+                  <button
+                    type="button"
+                    @click="copyGasCode"
+                    class="px-2.5 py-1 rounded bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs flex items-center gap-1.5 transition-colors shadow-sm"
+                  >
+                    <Check v-if="copiedGas" class="w-3.5 h-3.5 text-emerald-300" />
+                    <Copy v-else class="w-3.5 h-3.5" />
+                    <span>{{ copiedGas ? 'Tersalin!' : 'Salin Seluruh Script' }}</span>
+                  </button>
+                </div>
+                <pre class="p-3.5 font-mono text-[11px] text-indigo-200 overflow-x-auto max-h-72 leading-relaxed select-all">{{ gasScriptContent }}</pre>
+              </div>
+
+              <!-- Testing Webhook Box -->
+              <div class="p-3 bg-slate-900 rounded-xl border border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3">
+                <div>
+                  <span class="text-xs font-bold text-white block">Uji Coba Kirim Webhook Mutasi</span>
+                  <span class="text-[11px] text-slate-400">Simulasikan notifikasi dana masuk untuk memastikan server merespon dengan benar.</span>
+                </div>
+                <div class="flex items-center gap-2 shrink-0">
+                  <div class="relative">
+                    <span class="absolute inset-y-0 left-0 pl-2.5 flex items-center text-slate-500 text-xs">Rp</span>
+                    <input
+                      v-model.number="testMutationAmount"
+                      type="number"
+                      placeholder="27750"
+                      class="pl-8 pr-3 py-1.5 rounded-lg border border-slate-700 bg-slate-950 text-white font-mono text-xs w-32 outline-none"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    @click="sendTestMutation"
+                    :disabled="testingMutation"
+                    class="px-3.5 py-1.5 rounded-lg text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 transition-colors flex items-center gap-1.5 disabled:opacity-50"
+                  >
+                    <Loader2 v-if="testingMutation" class="w-3.5 h-3.5 animate-spin" />
+                    <span>{{ testingMutation ? 'Mengirim...' : 'Kirim Tes Webhook' }}</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- Status Aktif Toggle -->
           <div class="flex items-center justify-between pt-2">
             <div>
@@ -437,6 +542,9 @@ import {
   Copy,
   Trash2,
   X,
+  ExternalLink,
+  Code2,
+  Check,
 } from 'lucide-vue-next';
 import CameraScanner from '../../components/CameraScanner.vue';
 import { decodeQrFromFile } from '../../utils/qrDecoder';
@@ -453,6 +561,12 @@ const isDragging = ref(false);
 const showCameraScanner = ref(false);
 const uploadedImagePreview = ref<string | null>(null);
 const uploadedFileName = ref<string | null>(null);
+
+// Google Apps Script state
+const showGasCode = ref(false);
+const copiedGas = ref(false);
+const testMutationAmount = ref(27750);
+const testingMutation = ref(false);
 
 const DEFAULT_PLATFORM_QRIS = '00020101021126620014ID.LINKAJA.WWW01189360091100220945610211000000000010303UMI51440014ID.CO.QRIS.WWW0215ID10200210000010303UMI5204581253033605802ID5920PT KREATIF SKY ABADI6007JAKARTA61051011062070703A016304B835';
 
@@ -598,6 +712,157 @@ const mutationWebhookUrl = computed(() => {
 const copyMutationUrl = () => {
   navigator.clipboard.writeText(mutationWebhookUrl.value);
   toast.success('Disalin', 'URL Webhook mutasi berhasil disalin ke clipboard.');
+};
+
+const gasScriptContent = computed(() => {
+  const url = mutationWebhookUrl.value;
+  return `/**
+ * ============================================================================
+ * QMIS PLATFORM - GMAIL PAYMENT MUTATION DETECTOR (GOOGLE APPS SCRIPT)
+ * ============================================================================
+ * Script ini berjalan otomatis di cloud Google (GRATIS 24 JAM NONSTOP)
+ * untuk membaca email bukti uang masuk dari Bank / E-Wallet dan meneruskannya
+ * ke sistem Qmis secara realtime.
+ * 
+ * Mendukung: ShopeePay/Shopee Partner, BCA, Mandiri Livin, GoBiz/GoPay, DANA, LinkAja.
+ */
+
+// 1. URL Webhook Qmis Platform Anda (Otomatis Sesuai Domain Ini)
+const WEBHOOK_URL = "${url}";
+
+// 2. Filter Pencarian Gmail (Email dari Bank/E-Wallet dalam 1 hari terakhir yang belum dibaca)
+const GMAIL_SEARCH_QUERY = 'is:unread (from:shopee OR from:bca OR from:bankmandiri OR from:gopay OR from:dana OR from:linkaja OR subject:"QRIS" OR subject:"Transfer" OR subject:"Dana Masuk" OR subject:"Pembayaran Berhasil")';
+
+function checkIncomingPayments() {
+  Logger.log("Memulai pengecekan email transaksi masuk...");
+  
+  // Ambil thread email yang cocok dan belum dibaca
+  const threads = GmailApp.search(GMAIL_SEARCH_QUERY, 0, 10);
+  
+  if (threads.length === 0) {
+    Logger.log("Tidak ada email pembayaran baru.");
+    return;
+  }
+  
+  for (let i = 0; i < threads.length; i++) {
+    const thread = threads[i];
+    const messages = thread.getMessages();
+    
+    for (let j = 0; j < messages.length; j++) {
+      const msg = messages[j];
+      
+      if (!msg.isUnread()) continue;
+      
+      const subject = msg.getSubject();
+      const body = msg.getPlainBody();
+      const sender = msg.getFrom();
+      const date = msg.getDate();
+      
+      Logger.log("Memproses email dari: " + sender + " | Subjek: " + subject);
+      
+      // Ekstraksi nominal uang dari isi email
+      const amount = extractAmountFromBody(body) || extractAmountFromBody(subject);
+      
+      if (amount && amount > 0) {
+        Logger.log("Nominal terdeteksi: Rp " + amount);
+        
+        // Kirim notifikasi mutasi ke Webhook Qmis
+        const success = sendWebhookToQmis({
+          amount: amount,
+          description: subject,
+          sender: sender,
+          date: date.toISOString(),
+          source: "gmail_google_apps_script"
+        });
+        
+        if (success) {
+          // Tandai email sudah dibaca agar tidak diproses berulang
+          msg.markRead();
+          Logger.log("Email berhasil diproses dan ditandai lunas di Qmis.");
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Ekstraksi angka nominal rupiah dari teks email (misal: "Rp 27.750", "Rp. 27.750,00", "27,750")
+ */
+function extractAmountFromBody(text) {
+  if (!text) return null;
+  
+  const regexList = [
+    /(?:Rp\\.?|IDR)\\s*([0-9]{1,3}(?:\\.[0-9]{3})*(?:,[0-9]{2})?|[0-9]+)/i,
+    /(?:sebesar|nominal|total|jumlah)\\s*(?:Rp\\.?|IDR)?\\s*([0-9]{1,3}(?:\\.[0-9]{3})*)/i,
+    /([0-9]{1,3}(?:\\.[0-9]{3})+)/
+  ];
+  
+  for (let r = 0; r < regexList.length; r++) {
+    const match = text.match(regexList[r]);
+    if (match && match[1]) {
+      const cleanStr = match[1].replace(/\\./g, '').split(',')[0].trim();
+      const num = parseInt(cleanStr, 10);
+      if (!isNaN(num) && num > 0) {
+        return num;
+      }
+    }
+  }
+  return null;
+}
+
+/**
+ * Mengirim HTTP POST ke Webhook Qmis
+ */
+function sendWebhookToQmis(payload) {
+  const options = {
+    method: "post",
+    contentType: "application/json",
+    payload: JSON.stringify(payload),
+    muteHttpExceptions: true
+  };
+  
+  try {
+    const response = UrlFetchApp.fetch(WEBHOOK_URL, options);
+    const code = response.getResponseCode();
+    const content = response.getContentText();
+    Logger.log("Response dari Qmis [" + code + "]: " + content);
+    return code >= 200 && code < 300;
+  } catch (err) {
+    Logger.log("Gagal memanggil Webhook Qmis: " + err.toString());
+    return false;
+  }
+}`;
+});
+
+const copyGasCode = async () => {
+  await navigator.clipboard.writeText(gasScriptContent.value);
+  copiedGas.value = true;
+  toast.success('Script Disalin!', 'Kode Google Apps Script berhasil disalin ke clipboard.');
+  setTimeout(() => {
+    copiedGas.value = false;
+  }, 2500);
+};
+
+const sendTestMutation = async () => {
+  if (!testMutationAmount.value || testMutationAmount.value <= 0) {
+    toast.error('Nominal Tidak Valid', 'Masukkan nominal angka yang valid.');
+    return;
+  }
+
+  testingMutation.value = true;
+  try {
+    await api.post('/v1/billing/callbacks/mutation', {
+      amount: testMutationAmount.value,
+      description: 'Uji Coba Webhook Google Apps Script dari Pengaturan Admin',
+      source: 'admin_test',
+    });
+
+    toast.success('Webhook Diterima!', `Server berhasil mencatat mutasi Rp ${testMutationAmount.value.toLocaleString('id-ID')} dan melunasi faktur terkait.`);
+  } catch (err: any) {
+    toast.error('Gagal Mengirim Webhook', err.response?.data?.message || 'Tidak ada faktur pending dengan nominal tersebut, atau server error.');
+  } finally {
+    testingMutation.value = false;
+  }
 };
 
 const loadDefaultPlatformQris = () => {
