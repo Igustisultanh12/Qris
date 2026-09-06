@@ -172,4 +172,118 @@ class AuditFixesAndOtpTest extends TestCase
         $dashRes = $this->actingAs($user)->getJson('/api/customer/dashboard');
         $dashRes->assertStatus(200)->assertJsonPath('data.subscription', null);
     }
+
+    public function test_admin_can_preview_and_save_platform_static_qris(): void
+    {
+        $admin = User::where('email', 'admin@kreatifskyabadi.co.id')->first();
+        $payload = '00020101021126620014ID.LINKAJA.WWW01189360091100220945610211000000000010303UMI51440014ID.CO.QRIS.WWW0215ID10200210000010303UMI5204581253033605802ID5920PT KREATIF SKY ABADI6007JAKARTA61051011062070703A016304B835';
+
+        $previewRes = $this->actingAs($admin)->postJson('/api/admin/settings/qris-preview', [
+            'payload' => $payload,
+        ]);
+
+        $previewRes->assertStatus(200)
+            ->assertJsonPath('data.is_valid', true)
+            ->assertJsonPath('data.merchant_name', 'PT KREATIF SKY ABADI')
+            ->assertJsonPath('data.merchant_city', 'JAKARTA')
+            ->assertJsonPath('data.point_of_initiation', '11');
+
+        $updateRes = $this->actingAs($admin)->postJson('/api/admin/settings/update', [
+            'settings' => [
+                'platform_qris_static' => $payload,
+                'platform_qris_merchant_name' => 'PT KREATIF SKY ABADI',
+                'platform_qris_merchant_city' => 'JAKARTA',
+                'platform_qris_enabled' => true,
+            ],
+        ]);
+
+        $updateRes->assertStatus(200);
+        $this->assertEquals($payload, \App\Models\Setting::get('platform_qris_static'));
+    }
+
+    public function test_customer_can_generate_dynamic_qris_for_subscription_invoice(): void
+    {
+        $customerUser = User::where('email', 'demo@example.com')->first();
+        $plan = SubscriptionPlan::where('slug', 'pro')->first();
+
+        // 1. Create subscription invoice
+        $invRes = $this->actingAs($customerUser)->postJson('/api/customer/billing/invoices/create', [
+            'plan_slug' => 'pro',
+        ]);
+        $invRes->assertStatus(201);
+        $invoiceId = $invRes->json('data.uuid');
+        $invoiceTotal = $invRes->json('data.total');
+
+        // 2. Fetch converted dynamic QRIS for this invoice
+        $qrisRes = $this->actingAs($customerUser)->getJson("/api/customer/billing/invoices/{$invoiceId}/qris");
+        $qrisRes->assertStatus(200)
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('data.invoice.status', 'pending')
+            ->assertJsonPath('data.qris.point_of_initiation', '12')
+            ->assertJsonPath('data.qris.amount', $invoiceTotal);
+
+        $payload = $qrisRes->json('data.qris.payload');
+        $this->assertStringContainsString('010212', $payload); // Point of initiation method = 12 (Dynamic)
+        $this->assertStringContainsString((string) $invoiceTotal, $payload); // Injected nominal
+        $this->assertNotEmpty($qrisRes->json('data.qris.qr_svg'));
+    }
+
+    public function test_customer_can_simulate_payment_and_automatically_activate_subscription(): void
+    {
+        // Create an unsubscribed customer and user
+        $customer = Customer::create([
+            'name' => 'Budi Santoso',
+            'email' => 'budi.santoso@example.com',
+            'business_name' => 'Toko Budi Elektronik',
+            'status' => 'active',
+            'max_merchants' => 1,
+        ]);
+
+        $user = User::create([
+            'customer_id' => $customer->id,
+            'name' => 'Budi Santoso',
+            'email' => 'budi.santoso@example.com',
+            'password' => Hash::make('Secret123!'),
+            'status' => 'active',
+            'email_verified_at' => now(),
+        ]);
+
+        $customerRole = Role::where('slug', 'customer')->first();
+        if ($customerRole) {
+            $user->roles()->attach($customerRole->id);
+        }
+
+        // Attempting to generate API key while unsubscribed should be blocked (403)
+        $keyResBlocked = $this->actingAs($user)->postJson('/api/customer/api-keys', [
+            'name' => 'POS Toko Budi',
+        ]);
+        $keyResBlocked->assertStatus(403);
+
+        // Create invoice
+        $invRes = $this->actingAs($user)->postJson('/api/customer/billing/invoices/create', [
+            'plan_slug' => 'basic',
+        ]);
+        $invRes->assertStatus(201);
+        $invoiceId = $invRes->json('data.uuid');
+
+        // Simulate payment lunas (PAID) via dynamic QRIS
+        $payRes = $this->actingAs($user)->postJson("/api/customer/billing/invoices/{$invoiceId}/simulate-paid");
+        $payRes->assertStatus(200)
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('data.invoice.status', 'paid')
+            ->assertJsonPath('data.subscription.status', 'active');
+
+        $this->assertEquals('active', $customer->fresh()->activeSubscription?->status);
+
+        // Now that the customer has an active subscription, creating an API key succeeds (201)
+        $keyResSuccess = $this->actingAs($user->fresh())->postJson('/api/customer/api-keys', [
+            'name' => 'POS Toko Budi',
+        ]);
+
+        $keyResSuccess->assertStatus(201)
+            ->assertJsonPath('success', true)
+            ->assertJsonStructure(['data' => ['api_key', 'api_secret']]);
+    }
 }
+
+

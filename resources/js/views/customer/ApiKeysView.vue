@@ -1,6 +1,33 @@
 <template>
   <DashboardLayout>
-    <div class="space-y-8">
+    <!-- Locked Barrier if Customer is Unsubscribed -->
+    <div v-if="!isSubscribed" class="py-12">
+      <div class="bg-white dark:bg-slate-900 rounded-3xl border-2 border-indigo-500/20 p-8 sm:p-12 text-center shadow-xl max-w-xl mx-auto space-y-6">
+        <div class="w-16 h-16 rounded-2xl bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mx-auto shadow-inner">
+          <Lock class="w-8 h-8" />
+        </div>
+        <div class="space-y-2">
+          <h2 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">
+            Fitur API Khusus Pelanggan Berlangganan
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 leading-relaxed max-w-md mx-auto">
+            Akses kredensial REST API, kunci rahasia, webhook notifikasi, dan integrasi POS Qmis hanya dapat diakses oleh pelanggan dengan paket langganan aktif.
+          </p>
+        </div>
+        <div class="pt-2">
+          <router-link
+            to="/customer/billing"
+            class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-lg shadow-indigo-600/25 transition-all"
+          >
+            <Sparkles class="w-4 h-4" />
+            <span>Pilih & Aktifkan Paket Langganan</span>
+          </router-link>
+        </div>
+      </div>
+    </div>
+
+    <!-- Active Subscribed View -->
+    <div v-else class="space-y-8">
       
       <!-- Header -->
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -20,6 +47,7 @@
           <span>Buat API Key Baru</span>
         </button>
       </div>
+
 
       <!-- Quick Docs Info Banner -->
       <div class="p-4 rounded-2xl bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800/60 flex items-center justify-between gap-4 text-xs text-indigo-900 dark:text-indigo-300">
@@ -219,10 +247,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue';
+import { ref, reactive, computed, onMounted } from 'vue';
 import DashboardLayout from '../../layouts/DashboardLayout.vue';
 import Modal from '../../components/Modal.vue';
 import api from '../../api/client';
+import { useAuthStore } from '../../stores/auth';
 import { useToastStore } from '../../stores/toast';
 import {
   Key,
@@ -231,9 +260,17 @@ import {
   AlertTriangle,
   Copy,
   Loader2,
+  Lock,
+  Sparkles,
 } from 'lucide-vue-next';
 
+const authStore = useAuthStore();
 const toast = useToastStore();
+
+const isSubscribed = computed(() => {
+  const sub = authStore.user?.customer?.active_subscription;
+  return sub?.status === 'active';
+});
 
 const apiKeys = ref<any[]>([]);
 const loading = ref(true);
@@ -249,6 +286,11 @@ const newKey = reactive({
 });
 
 const fetchKeys = async () => {
+  if (!isSubscribed.value) {
+    loading.value = false;
+    return;
+  }
+
   loading.value = true;
   try {
     const res = await api.get('/customer/api-keys');
@@ -260,6 +302,7 @@ const fetchKeys = async () => {
     loading.value = false;
   }
 };
+
 
 const createApiKey = async () => {
   submitting.value = true;

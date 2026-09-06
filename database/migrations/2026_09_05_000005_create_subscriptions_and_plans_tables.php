@@ -35,7 +35,8 @@ return new class extends Migration
             $table->uuid('uuid')->unique();
             $table->foreignId('customer_id')->constrained()->cascadeOnDelete();
             $table->foreignId('plan_id')->constrained('subscription_plans')->cascadeOnDelete();
-            $table->enum('status', ['trial', 'active', 'past_due', 'suspended', 'cancelled', 'expired'])->default('trial');
+            $table->enum('status', ['trial', 'active', 'pending', 'past_due', 'suspended', 'cancelled', 'expired'])->default('trial');
+
             $table->unsignedBigInteger('price');
             $table->string('currency', 10)->default('IDR');
             $table->timestamp('starts_at')->nullable();

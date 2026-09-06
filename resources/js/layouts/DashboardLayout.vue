@@ -91,7 +91,9 @@
             <span>Riwayat Transaksi</span>
           </router-link>
 
+          <!-- API & Integration (Only visible if customer has active subscription) -->
           <router-link
+            v-if="isSubscribed"
             to="/api-credentials"
             @click="sidebarOpen = false"
             class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors"
@@ -104,6 +106,7 @@
           </router-link>
 
           <router-link
+            v-if="isSubscribed"
             to="/webhooks"
             @click="sidebarOpen = false"
             class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors"
@@ -114,6 +117,7 @@
             </svg>
             <span>Webhooks</span>
           </router-link>
+
 
           <router-link
             to="/billing"
@@ -211,11 +215,17 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { useAuthStore } from '../stores/auth';
 import { useThemeStore } from '../stores/theme';
 
 const authStore = useAuthStore();
 const themeStore = useThemeStore();
 const sidebarOpen = ref(false);
+
+const isSubscribed = computed(() => {
+  const sub = authStore.user?.customer?.active_subscription;
+  return sub?.status === 'active';
+});
 </script>
+

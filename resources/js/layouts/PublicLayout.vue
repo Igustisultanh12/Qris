@@ -18,9 +18,9 @@
         <nav class="hidden md:flex items-center gap-6 text-sm font-medium text-slate-600 dark:text-slate-300">
           <router-link to="/" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Beranda</router-link>
           <router-link to="/pricing" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Harga Paket</router-link>
-          <router-link to="/api-docs" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Dokumentasi API</router-link>
           <router-link to="/terms" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Syarat & Ketentuan</router-link>
         </nav>
+
 
         <!-- Right Side: Dark Mode & Auth -->
         <div class="flex items-center gap-3">
@@ -89,10 +89,11 @@
           <h4 class="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white mb-3">Produk & Solusi</h4>
           <ul class="space-y-2 text-sm text-slate-500 dark:text-slate-400">
             <li><router-link to="/pricing" class="hover:text-indigo-600">Paket Harga</router-link></li>
-            <li><router-link to="/api-docs" class="hover:text-indigo-600">REST API Platform</router-link></li>
-            <li><a href="/docs/openapi.json" target="_blank" class="hover:text-indigo-600">OpenAPI Spec (JSON)</a></li>
+            <li><span class="text-xs text-slate-400">Konversi QRIS Dinamis</span></li>
+            <li><span class="text-xs text-slate-400">Integrasi POS & Kasir</span></li>
           </ul>
         </div>
+
 
         <div>
           <h4 class="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white mb-3">Legal & Keamanan</h4>

@@ -277,7 +277,14 @@ class AuthController extends Controller
                 'customer' => $user->customer ? [
                     'id' => $user->customer->id,
                     'uuid' => $user->customer->uuid,
+                    'name' => $user->customer->name,
                     'business_name' => $user->customer->business_name,
+                    'status' => $user->customer->status,
+                    'active_subscription' => $user->customer->activeSubscription ? [
+                        'status' => $user->customer->activeSubscription->status,
+                        'plan' => $user->customer->activeSubscription->plan?->name,
+                        'ends_at' => $user->customer->activeSubscription->ends_at?->toDateString(),
+                    ] : null,
                 ] : null,
             ],
         ], 'Login successful');

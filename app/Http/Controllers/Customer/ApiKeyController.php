@@ -31,8 +31,18 @@ class ApiKeyController extends Controller
     public function store(Request $request): JsonResponse
     {
         $customer = $request->user()->customer;
+        if (!$customer) {
+            return ApiResponse::error('Hanya akun pelanggan yang dapat mengelola API Key.', null, 403);
+        }
+
+        $activeSub = $customer->activeSubscription()->first();
+        if (!$activeSub || $activeSub->status !== 'active') {
+            return ApiResponse::error('Akses API memerlukan paket langganan aktif. Silakan pilih dan aktifkan paket langganan Anda terlebih dahulu.', null, 403);
+        }
+
 
         $validator = Validator::make($request->all(), [
+
             'name' => ['required', 'string', 'max:100'],
             'ip_whitelist' => ['nullable'],
             'rate_limit_per_minute' => ['nullable', 'integer', 'min:10', 'max:5000'],

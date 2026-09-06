@@ -17,11 +17,18 @@ class SettingSeeder extends Seeder
             ['group' => 'general', 'key' => 'company_phone', 'value' => '+62 21 555 0199', 'type' => 'string', 'description' => 'Nomor telepon kantor'],
             ['group' => 'general', 'key' => 'company_address', 'value' => 'Jl. Sudirman No. 88, Jakarta Pusat, DKI Jakarta 10220', 'type' => 'string', 'description' => 'Alamat kantor operasional'],
 
-            // QRIS Engine
+            // QRIS Engine & Platform Static QRIS
             ['group' => 'qris', 'key' => 'qris_default_expiry_minutes', 'value' => '15', 'type' => 'integer', 'description' => 'Masa berlaku default dynamic QR (menit)'],
             ['group' => 'qris', 'key' => 'qris_min_amount', 'value' => '1000', 'type' => 'integer', 'description' => 'Nominal transaksi minimum QRIS (Rp)'],
             ['group' => 'qris', 'key' => 'qris_max_amount', 'value' => '100000000', 'type' => 'integer', 'description' => 'Nominal transaksi maksimum QRIS (Rp)'],
             ['group' => 'qris', 'key' => 'qris_default_fee_mode', 'value' => 'charged_to_customer', 'type' => 'string', 'description' => 'Mode penagihan fee default'],
+            ['group' => 'qris', 'key' => 'platform_qris_static', 'value' => '00020101021126620014ID.LINKAJA.WWW01189360091100220945610211000000000010303UMI51440014ID.CO.QRIS.WWW0215ID10200210000010303UMI5204581253033605802ID5920PT KREATIF SKY ABADI6007JAKARTA61051011062070703A016304B835', 'type' => 'string', 'description' => 'Payload string QRIS Statis platform untuk pembayaran langganan'],
+
+            ['group' => 'qris', 'key' => 'platform_qris_merchant_name', 'value' => 'PT KREATIF SKY ABADI', 'type' => 'string', 'description' => 'Nama merchant resmi pada QRIS platform'],
+            ['group' => 'qris', 'key' => 'platform_qris_merchant_city', 'value' => 'JAKARTA', 'type' => 'string', 'description' => 'Kota merchant pada QRIS platform'],
+            ['group' => 'qris', 'key' => 'platform_qris_postal_code', 'value' => '10110', 'type' => 'string', 'description' => 'Kode pos merchant platform'],
+            ['group' => 'qris', 'key' => 'platform_qris_enabled', 'value' => '1', 'type' => 'boolean', 'description' => 'Status aktif pembayaran langganan menggunakan QRIS dinamis'],
+
 
             // Billing & Taxes
             ['group' => 'billing', 'key' => 'billing_tax_enabled', 'value' => '1', 'type' => 'boolean', 'description' => 'Aktifkan pajak PPN pada invoice'],

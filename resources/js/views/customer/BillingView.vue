@@ -125,58 +125,117 @@
         </div>
       </div>
 
-      <!-- Pay Invoice Modal -->
-      <Modal :is-open="showPayModal" title="Bayar Tagihan Faktur" max-width="max-w-lg" @close="showPayModal = false">
-        <div v-if="selectedInvoice" class="space-y-5">
-          <div class="p-4 bg-slate-50 dark:bg-slate-800 rounded-xl space-y-2 text-xs">
-            <div class="flex justify-between">
-              <span class="text-slate-500">Nomor Invoice</span>
-              <span class="font-mono font-bold text-slate-900 dark:text-white">{{ selectedInvoice.invoice_number }}</span>
+      <!-- Pay Invoice Modal (DYNAMIC QRIS FROM PLATFORM STATIC) -->
+      <Modal :is-open="showPayModal" title="Pembayaran QRIS Dinamis Platform" max-width="max-w-lg" @close="showPayModal = false">
+        <div v-if="selectedInvoice" class="space-y-4">
+          <!-- Summary Header -->
+          <div class="p-4 bg-slate-50 dark:bg-slate-800/80 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 flex items-center justify-between">
+            <div>
+              <span class="text-[11px] text-slate-500 block">Total Tagihan Faktur</span>
+              <span class="text-xl font-black text-indigo-600 dark:text-indigo-400 font-mono">
+                {{ formatRupiah(selectedInvoice.total) }}
+              </span>
             </div>
-            <div class="flex justify-between">
-              <span class="text-slate-500">Total Pembayaran</span>
-              <span class="font-bold text-base text-primary-600 dark:text-primary-400">{{ formatRupiah(selectedInvoice.total) }}</span>
+            <div class="text-right">
+              <span class="text-[11px] text-slate-500 block">Nomor Invoice</span>
+              <span class="font-mono text-xs font-bold text-slate-900 dark:text-white">
+                {{ selectedInvoice.invoice_number }}
+              </span>
             </div>
           </div>
 
-          <div>
-            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2">Pilih Saluran Pembayaran</label>
-            <div class="space-y-2">
-              <label
-                v-for="gw in gateways"
-                :key="gw.id"
-                :class="[
-                  'p-3.5 rounded-xl border-2 cursor-pointer flex items-center justify-between transition-all',
-                  paymentGateway === gw.id ? 'border-primary-600 bg-primary-50/40 dark:bg-primary-950/20' : 'border-slate-200 dark:border-slate-700'
-                ]"
-              >
-                <div class="flex items-center gap-3">
-                  <input type="radio" :value="gw.id" v-model="paymentGateway" class="text-primary-600" />
-                  <div>
-                    <div class="text-xs font-bold text-slate-900 dark:text-white">{{ gw.name }}</div>
-                    <div class="text-[11px] text-slate-500">{{ gw.desc }}</div>
-                  </div>
+          <!-- Loading QRIS state -->
+          <div v-if="loadingQris" class="py-12 flex flex-col items-center justify-center gap-2 text-slate-400">
+            <Loader2 class="w-8 h-8 animate-spin text-indigo-600" />
+            <span class="text-xs">Mengonversi QRIS Statis Platform ke Dinamis...</span>
+          </div>
+
+          <!-- QRIS Display Card -->
+          <div v-else-if="qrisInfo" class="space-y-4">
+            <div class="bg-white dark:bg-slate-900 rounded-2xl border-2 border-indigo-500/30 p-5 flex flex-col items-center text-center shadow-lg relative">
+              <div class="w-full flex items-center justify-between pb-3 mb-2 border-b border-slate-100 dark:border-slate-800">
+                <div class="flex items-center gap-2">
+                  <div class="w-6 h-6 rounded bg-rose-600 text-white font-black text-[10px] flex items-center justify-center">QR</div>
+                  <span class="text-xs font-black tracking-wider text-slate-900 dark:text-white uppercase">QRIS DINAMIS</span>
                 </div>
-              </label>
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400">
+                  NOMINAL OTOMATIS
+                </span>
+              </div>
+
+              <!-- Merchant info -->
+              <div class="mb-3">
+                <div class="text-xs font-extrabold text-slate-900 dark:text-white uppercase tracking-tight">
+                  {{ qrisInfo.qris?.merchant_name || 'PT KREATIF SKY ABADI' }}
+                </div>
+                <div class="text-[11px] text-slate-500">
+                  NMID: ID1020000000001 &bull; {{ qrisInfo.qris?.merchant_city || 'JAKARTA' }}
+                </div>
+              </div>
+
+              <!-- QR Code visual SVG -->
+              <div class="p-3 bg-white rounded-2xl border border-slate-200 shadow-inner max-w-[240px] w-full aspect-square flex items-center justify-center overflow-hidden">
+                <div v-html="qrisInfo.qris?.qr_svg" class="w-full h-full flex items-center justify-center [&>svg]:w-full [&>svg]:h-full"></div>
+              </div>
+
+              <!-- QR Nominal highlight -->
+              <div class="mt-3 text-center">
+                <span class="text-[11px] text-slate-400 block">Nominal Tertera pada QR:</span>
+                <span class="text-lg font-black text-slate-900 dark:text-white">
+                  {{ formatRupiah(qrisInfo.qris?.amount || selectedInvoice.total) }}
+                </span>
+              </div>
+
+              <div class="mt-2 text-[10px] text-slate-400 flex items-center gap-1">
+                <span>Scan dengan GoPay, OVO, Dana, ShopeePay, BCA, Mandiri, BRI, BNI, LinkAja</span>
+              </div>
+            </div>
+
+            <!-- String payload with copy button -->
+            <div class="p-3 bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-between gap-2 text-xs">
+              <div class="truncate font-mono text-[11px] text-slate-600 dark:text-slate-300">
+                {{ qrisInfo.qris?.payload }}
+              </div>
+              <button
+                type="button"
+                @click="copyPayload(qrisInfo.qris?.payload)"
+                class="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-700 hover:bg-slate-200 text-slate-700 dark:text-slate-200 font-semibold text-xs shrink-0 flex items-center gap-1 shadow-sm"
+              >
+                <Check v-if="copied" class="w-3.5 h-3.5 text-emerald-600" />
+                <Copy v-else class="w-3.5 h-3.5" />
+                <span>{{ copied ? 'Tersalin' : 'Salin' }}</span>
+              </button>
+            </div>
+
+            <!-- Simulation button -->
+            <div class="pt-2">
+              <button
+                type="button"
+                @click="simulatePayment"
+                :disabled="paying"
+                class="w-full py-3 px-4 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-600/20 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+              >
+                <Loader2 v-if="paying" class="w-4 h-4 animate-spin" />
+                <CheckCircle v-else class="w-4 h-4" />
+                <span>{{ paying ? 'Memverifikasi Pembayaran...' : 'Simulasikan Pembayaran Lunas (PAID)' }}</span>
+              </button>
+              <p class="text-[11px] text-center text-slate-400 mt-2">
+                Klik tombol di atas untuk simulasi pelunasan langsung dan aktivasi paket seketika.
+              </p>
             </div>
           </div>
 
-          <div class="flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
+          <div v-else class="py-8 text-center text-xs text-rose-500">
+            Gagal memuat QRIS dinamis untuk invoice ini. Silakan coba kembali.
+          </div>
+
+          <div class="flex justify-end pt-3 border-t border-slate-100 dark:border-slate-800">
             <button
               type="button"
               @click="showPayModal = false"
-              class="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 rounded-xl"
+              class="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl"
             >
-              Batal
-            </button>
-            <button
-              type="button"
-              @click="processPayment"
-              :disabled="paying"
-              class="px-5 py-2.5 text-xs font-bold text-white bg-primary-600 hover:bg-primary-700 rounded-xl flex items-center gap-2 shadow-md disabled:opacity-50"
-            >
-              <Loader2 v-if="paying" class="w-3.5 h-3.5 animate-spin" />
-              <span>Konfirmasi Pembayaran</span>
+              Tutup
             </button>
           </div>
         </div>
@@ -220,14 +279,18 @@ import { ref, onMounted } from 'vue';
 import DashboardLayout from '../../layouts/DashboardLayout.vue';
 import Modal from '../../components/Modal.vue';
 import api from '../../api/client';
+import { useAuthStore } from '../../stores/auth';
 import { useToastStore } from '../../stores/toast';
 import {
   Sparkles,
   Receipt,
   CheckCircle,
   Loader2,
+  Copy,
+  Check,
 } from 'lucide-vue-next';
 
+const authStore = useAuthStore();
 const toast = useToastStore();
 
 const subscription = ref<any>(null);
@@ -238,15 +301,10 @@ const loadingInvoices = ref(true);
 const showPayModal = ref(false);
 const showUpgradeModal = ref(false);
 const selectedInvoice = ref<any>(null);
-const paymentGateway = ref('manual');
+const qrisInfo = ref<any>(null);
+const loadingQris = ref(false);
 const paying = ref(false);
-
-const gateways = [
-  { id: 'manual', name: 'Transfer Bank Manual (BCA / Mandiri / BRI)', desc: 'Verifikasi instan via konfirmasi transfer' },
-  { id: 'midtrans', name: 'Midtrans Payment Gateway', desc: 'QRIS, GoPay, ShopeePay, Virtual Account' },
-  { id: 'xendit', name: 'Xendit Gateway', desc: 'Virtual Account & E-Wallet' },
-  { id: 'tripay', name: 'Tripay Gateway', desc: 'Alfamart / Indomaret & VA' },
-];
+const copied = ref(false);
 
 const fetchBilling = async () => {
   loadingInvoices.value = true;
@@ -257,7 +315,7 @@ const fetchBilling = async () => {
       api.get('/plans'),
     ]);
 
-    subscription.value = subRes.data.data;
+    subscription.value = subRes.data.data?.subscription || subRes.data.data;
     const invRaw = invRes.data.data;
     invoices.value = Array.isArray(invRaw) ? invRaw : (invRaw?.data || []);
     const pRaw = plansRes.data.data;
@@ -269,22 +327,50 @@ const fetchBilling = async () => {
   }
 };
 
-const openPayModal = (inv: any) => {
+const openPayModal = async (inv: any) => {
   selectedInvoice.value = inv;
   showPayModal.value = true;
+  loadingQris.value = true;
+  qrisInfo.value = null;
+
+  try {
+    const invId = inv.uuid || inv.id;
+    const res = await api.get(`/customer/billing/invoices/${invId}/qris`);
+    qrisInfo.value = res.data.data;
+  } catch (err: any) {
+    toast.error('Gagal Memuat QRIS', err.response?.data?.message || 'Terjadi kesalahan saat memuat QRIS dinamis.');
+  } finally {
+    loadingQris.value = false;
+  }
 };
 
-const processPayment = async () => {
+const copyPayload = async (payload?: string) => {
+  if (!payload) return;
+  try {
+    await navigator.clipboard.writeText(payload);
+    copied.value = true;
+    setTimeout(() => {
+      copied.value = false;
+    }, 2000);
+    toast.success('Disalin', 'String payload QRIS berhasil disalin ke clipboard.');
+  } catch {
+    // fallback
+  }
+};
+
+const simulatePayment = async () => {
   if (!selectedInvoice.value) return;
   paying.value = true;
   try {
     const invId = selectedInvoice.value.uuid || selectedInvoice.value.id;
-    const res = await api.post(`/customer/billing/invoices/${invId}/pay`, {
-      gateway: paymentGateway.value,
-    });
-    toast.success('Pembayaran Diproses', res.data.message || 'Invoice berhasil dibayar.');
+    const res = await api.post(`/customer/billing/invoices/${invId}/simulate-paid`);
+    toast.success('Pembayaran Lunas!', res.data.message || 'Paket langganan Anda telah aktif!');
+    
+    // Refresh user state so auth store immediately reflects the active subscription
+    await authStore.fetchUser();
+    
     showPayModal.value = false;
-    fetchBilling();
+    await fetchBilling();
   } catch (err: any) {
     toast.error('Gagal Memproses Pembayaran', err.response?.data?.message || 'Terjadi kesalahan.');
   } finally {
@@ -294,12 +380,18 @@ const processPayment = async () => {
 
 const selectPlanUpgrade = async (planId: number) => {
   try {
-    await api.post('/customer/billing/invoices/create', { plan_id: planId });
-    toast.success('Faktur Dibuat', 'Faktur untuk upgrade paket berhasil dibuat. Silakan lakukan pembayaran.');
+    const res = await api.post('/customer/billing/invoices/create', { plan_id: planId });
+    toast.success('Faktur Dibuat', 'Faktur berhasil dibuat. Silakan selesaikan pembayaran QRIS.');
     showUpgradeModal.value = false;
-    fetchBilling();
+    await fetchBilling();
+    
+    // Immediately open the dynamic QRIS modal for the newly generated invoice
+    const createdInvoice = res.data.data;
+    if (createdInvoice) {
+      openPayModal(createdInvoice);
+    }
   } catch (err: any) {
-    toast.error('Gagal Upgrade', err.response?.data?.message || 'Terjadi kesalahan.');
+    toast.error('Gagal Memilih Paket', err.response?.data?.message || 'Terjadi kesalahan.');
   }
 };
 
@@ -330,3 +422,4 @@ onMounted(() => {
   fetchBilling();
 });
 </script>
+

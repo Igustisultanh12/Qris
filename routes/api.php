@@ -122,6 +122,8 @@ Route::middleware(['auth:sanctum', 'assign.request.id'])->group(function () {
         Route::get('/billing/current', [SubscriptionBillingController::class, 'current']);
         Route::get('/billing/invoices', [SubscriptionBillingController::class, 'invoices']);
         Route::post('/billing/invoices/create', [SubscriptionBillingController::class, 'createInvoice']);
+        Route::get('/billing/invoices/{id}/qris', [SubscriptionBillingController::class, 'getInvoiceQris']);
+        Route::post('/billing/invoices/{id}/simulate-paid', [SubscriptionBillingController::class, 'simulatePaid']);
         Route::post('/billing/invoices/{id}/pay', [SubscriptionBillingController::class, 'pay']);
     });
 
@@ -150,7 +152,9 @@ Route::middleware(['auth:sanctum', 'assign.request.id'])->group(function () {
         // System Settings & Audit Logs
         Route::get('/settings', [AdminSettingController::class, 'index']);
         Route::post('/settings/update', [AdminSettingController::class, 'update']);
+        Route::post('/settings/qris-preview', [AdminSettingController::class, 'previewQris']);
         Route::get('/audit-logs', [AdminAuditController::class, 'index']);
+
 
         // Email Gateway System
         Route::get('/email-gateway', [AdminEmailGatewayController::class, 'index']);
