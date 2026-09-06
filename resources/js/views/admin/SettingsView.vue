@@ -43,13 +43,134 @@
               </p>
             </div>
 
-            <button
-              type="button"
-              @click="loadDefaultPlatformQris"
-              class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-colors shrink-0"
+            <!-- Action buttons in header -->
+            <div class="flex flex-wrap items-center gap-2 shrink-0">
+              <button
+                type="button"
+                @click="openQrFileInput"
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white transition-colors shadow-sm"
+                title="Pilih gambar QRIS dari komputer"
+              >
+                <Upload class="w-3.5 h-3.5" />
+                <span>Upload QRIS</span>
+              </button>
+
+              <button
+                type="button"
+                @click="showCameraScanner = !showCameraScanner"
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-colors"
+                title="Pindai QR menggunakan kamera"
+              >
+                <Camera class="w-3.5 h-3.5" />
+                <span>{{ showCameraScanner ? 'Tutup Kamera' : 'Scan Kamera' }}</span>
+              </button>
+
+              <button
+                type="button"
+                @click="loadDefaultPlatformQris"
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-colors"
+                title="Gunakan default template PT Kreatif Sky Abadi"
+              >
+                <Sparkles class="w-3.5 h-3.5 text-indigo-400" />
+                <span>Muat Template</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Invisible file input for file uploads -->
+          <input
+            ref="qrFileInput"
+            type="file"
+            accept="image/*"
+            class="hidden"
+            @change="handleFileSelected"
+          />
+
+          <!-- Expandable Camera Scanner Box -->
+          <div v-if="showCameraScanner" class="p-4 bg-slate-900/90 rounded-xl border border-indigo-800/60 space-y-3">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <Camera class="w-4 h-4 text-indigo-400" />
+                <span class="text-xs font-bold text-white">Pemindai Kamera QRIS Statis</span>
+              </div>
+              <button
+                type="button"
+                @click="showCameraScanner = false"
+                class="p-1 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800"
+              >
+                <X class="w-4 h-4" />
+              </button>
+            </div>
+            <CameraScanner @scan="handleScannedQris" @scan-success="handleScannedQris" />
+          </div>
+
+          <!-- Drag & Drop Upload Zone -->
+          <div
+            @dragover.prevent="isDragging = true"
+            @dragleave.prevent="isDragging = false"
+            @drop.prevent="handleDrop"
+            class="relative rounded-xl border-2 border-dashed transition-all"
+            :class="[
+              isDragging
+                ? 'border-indigo-500 bg-indigo-950/40'
+                : 'border-slate-800 hover:border-indigo-600/50 bg-slate-900/40'
+            ]"
+          >
+            <!-- When image is uploaded and preview is active -->
+            <div v-if="uploadedImagePreview" class="p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div class="flex items-center gap-3">
+                <div class="relative w-16 h-16 rounded-lg bg-black border border-slate-700 overflow-hidden shrink-0 flex items-center justify-center">
+                  <img :src="uploadedImagePreview" alt="QRIS Preview" class="w-full h-full object-contain" />
+                </div>
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs font-bold text-white">{{ uploadedFileName || 'Gambar QRIS Terunggah' }}</span>
+                    <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                      Terbaca & Valid
+                    </span>
+                  </div>
+                  <p class="text-[11px] text-slate-400 mt-0.5">
+                    Payload EMVCo string dan informasi merchant telah berhasil diekstrak otomatis.
+                  </p>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  @click="openQrFileInput"
+                  class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-colors flex items-center gap-1.5"
+                >
+                  <Upload class="w-3.5 h-3.5" />
+                  <span>Ganti Gambar</span>
+                </button>
+                <button
+                  type="button"
+                  @click="clearUploadedImage"
+                  class="p-1.5 rounded-lg text-xs text-rose-400 hover:bg-rose-950/40 border border-slate-800 transition-colors"
+                  title="Hapus gambar preview"
+                >
+                  <Trash2 class="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            <!-- When no image uploaded yet -->
+            <div
+              v-else
+              @click="openQrFileInput"
+              class="p-6 flex flex-col items-center justify-center text-center cursor-pointer group"
             >
-              Muat Template PT Kreatif Sky Abadi
-            </button>
+              <div class="w-12 h-12 rounded-2xl bg-indigo-950/60 border border-indigo-800/40 text-indigo-400 flex items-center justify-center mb-2.5 group-hover:scale-110 group-hover:bg-indigo-900/60 transition-all">
+                <QrCode class="w-6 h-6" />
+              </div>
+              <div class="text-xs font-semibold text-white group-hover:text-indigo-300 transition-colors">
+                <span class="text-indigo-400 underline">Klik untuk Unggah Gambar QRIS</span> atau Tarik & Lepas (Drag & Drop) di sini
+              </div>
+              <p class="text-[11px] text-slate-500 mt-1 max-w-md">
+                Mendukung JPG, PNG, WEBP. Anda juga bisa screenshot QRIS (Win+Shift+S) lalu tekan <kbd class="px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 font-mono text-[10px]">Ctrl + V</kbd> (Paste) langsung di halaman ini.
+              </p>
+            </div>
           </div>
 
           <!-- Payload Input -->
@@ -58,14 +179,33 @@
               <label class="block text-xs font-semibold text-slate-300">
                 Payload String QRIS Statis (EMVCo String)
               </label>
-              <span class="text-[11px] text-slate-400 font-mono">Tag 01=11 (Static)</span>
+              <div class="flex items-center gap-3">
+                <button
+                  v-if="form['platform_qris_static']"
+                  type="button"
+                  @click="copyPayload"
+                  class="text-[11px] text-indigo-400 hover:text-indigo-300 flex items-center gap-1 font-medium transition-colors"
+                >
+                  <Copy class="w-3 h-3" />
+                  <span>Salin Payload</span>
+                </button>
+                <button
+                  v-if="form['platform_qris_static']"
+                  type="button"
+                  @click="clearPayload"
+                  class="text-[11px] text-rose-400 hover:text-rose-300 flex items-center gap-1 font-medium transition-colors"
+                >
+                  <Trash2 class="w-3 h-3" />
+                  <span>Bersihkan</span>
+                </button>
+                <span class="text-[11px] text-slate-400 font-mono">Tag 01=11 (Static)</span>
+              </div>
             </div>
             <textarea
               v-model="form['platform_qris_static']"
               rows="3"
               class="w-full px-3.5 py-2.5 rounded-xl border border-slate-800 bg-slate-900 text-white font-mono text-xs outline-none focus:border-indigo-500 transition-colors"
               placeholder="00020101021126620014ID.LINKAJA.WWW01189360091100220945610211000000000010303UMI51440014ID.CO.QRIS.WWW0215ID10200210000010303UMI5204581253033605802ID5920PT KREATIF SKY ABADI6007JAKARTA61051011062070703A016304B835"
-
               @input="onQrisInputChange"
             ></textarea>
           </div>
@@ -257,11 +397,22 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue';
+import { ref, reactive, onMounted, onUnmounted } from 'vue';
 import AdminLayout from '../../layouts/AdminLayout.vue';
 import api from '../../api/client';
 import { useToastStore } from '../../stores/toast';
-import { Loader2 } from 'lucide-vue-next';
+import {
+  Loader2,
+  Upload,
+  Camera,
+  QrCode,
+  Sparkles,
+  Copy,
+  Trash2,
+  X,
+} from 'lucide-vue-next';
+import CameraScanner from '../../components/CameraScanner.vue';
+import { decodeQrFromFile } from '../../utils/qrDecoder';
 
 const toast = useToastStore();
 
@@ -269,8 +420,14 @@ const loading = ref(true);
 const saving = ref(false);
 const previewResult = ref<any>(null);
 
-const DEFAULT_PLATFORM_QRIS = '00020101021126620014ID.LINKAJA.WWW01189360091100220945610211000000000010303UMI51440014ID.CO.QRIS.WWW0215ID10200210000010303UMI5204581253033605802ID5920PT KREATIF SKY ABADI6007JAKARTA61051011062070703A016304B835';
+// QR Upload & Scanner State
+const qrFileInput = ref<HTMLInputElement | null>(null);
+const isDragging = ref(false);
+const showCameraScanner = ref(false);
+const uploadedImagePreview = ref<string | null>(null);
+const uploadedFileName = ref<string | null>(null);
 
+const DEFAULT_PLATFORM_QRIS = '00020101021126620014ID.LINKAJA.WWW01189360091100220945610211000000000010303UMI51440014ID.CO.QRIS.WWW0215ID10200210000010303UMI5204581253033605802ID5920PT KREATIF SKY ABADI6007JAKARTA61051011062070703A016304B835';
 
 const form = reactive<Record<string, any>>({
   'app_name': 'Qmis',
@@ -298,11 +455,14 @@ const validateQrisPreview = async (payload: string) => {
   try {
     const res = await api.post('/admin/settings/qris-preview', { payload });
     previewResult.value = res.data.data;
-    if (res.data.data.merchant_name && !form['platform_qris_merchant_name']) {
+    if (res.data.data.merchant_name) {
       form['platform_qris_merchant_name'] = res.data.data.merchant_name;
     }
-    if (res.data.data.merchant_city && !form['platform_qris_merchant_city']) {
+    if (res.data.data.merchant_city) {
       form['platform_qris_merchant_city'] = res.data.data.merchant_city;
+    }
+    if (res.data.data.postal_code) {
+      form['platform_qris_postal_code'] = res.data.data.postal_code;
     }
   } catch (err: any) {
     previewResult.value = {
@@ -319,12 +479,98 @@ const onQrisInputChange = () => {
   }, 400);
 };
 
+const openQrFileInput = () => {
+  qrFileInput.value?.click();
+};
+
+const handleFileSelected = (e: Event) => {
+  const target = e.target as HTMLInputElement;
+  const file = target.files?.[0];
+  if (file) {
+    processImageFile(file);
+  }
+  target.value = '';
+};
+
+const handleDrop = (e: DragEvent) => {
+  isDragging.value = false;
+  const file = e.dataTransfer?.files?.[0];
+  if (file) {
+    processImageFile(file);
+  }
+};
+
+const processImageFile = async (file: File) => {
+  if (!file.type.startsWith('image/')) {
+    toast.error('File Tidak Didukung', 'Silakan pilih file gambar (PNG, JPG, WEBP, atau SVG).');
+    return;
+  }
+
+  // Create local preview
+  const reader = new FileReader();
+  reader.onload = () => {
+    uploadedImagePreview.value = reader.result as string;
+    uploadedFileName.value = file.name;
+  };
+  reader.readAsDataURL(file);
+
+  try {
+    const payload = await decodeQrFromFile(file);
+    form['platform_qris_static'] = payload;
+    await validateQrisPreview(payload);
+    toast.success('QRIS Berhasil Dipindai!', 'Payload string dan identitas merchant berhasil diekstrak dari gambar.');
+  } catch (err: any) {
+    toast.error('Gagal Mendeteksi QRIS', err.message || 'Pastikan gambar QR terlihat jelas.');
+  }
+};
+
+const handleScannedQris = async (payload: string) => {
+  form['platform_qris_static'] = payload;
+  showCameraScanner.value = false;
+  await validateQrisPreview(payload);
+  toast.success('QRIS Berhasil Dipindai!', 'Payload string dari kamera berhasil diterapkan.');
+};
+
+const handlePaste = (e: ClipboardEvent) => {
+  const items = e.clipboardData?.items;
+  if (!items) return;
+
+  for (const item of items) {
+    if (item.type.startsWith('image/')) {
+      const file = item.getAsFile();
+      if (file) {
+        processImageFile(file);
+        break;
+      }
+    }
+  }
+};
+
+const clearUploadedImage = () => {
+  uploadedImagePreview.value = null;
+  uploadedFileName.value = null;
+};
+
+const copyPayload = () => {
+  if (!form['platform_qris_static']) return;
+  navigator.clipboard.writeText(form['platform_qris_static']);
+  toast.success('Disalin', 'Payload string QRIS telah disalin ke clipboard.');
+};
+
+const clearPayload = () => {
+  form['platform_qris_static'] = '';
+  previewResult.value = null;
+  clearUploadedImage();
+  toast.info('Dibersihkan', 'Payload QRIS telah dikosongkan.');
+};
+
 const loadDefaultPlatformQris = () => {
   form['platform_qris_static'] = DEFAULT_PLATFORM_QRIS;
   form['platform_qris_merchant_name'] = 'PT KREATIF SKY ABADI';
   form['platform_qris_merchant_city'] = 'JAKARTA';
   form['platform_qris_postal_code'] = '10110';
   form['platform_qris_enabled'] = true;
+  clearUploadedImage();
   validateQrisPreview(DEFAULT_PLATFORM_QRIS);
   toast.success('Template Dimuat', 'Template QRIS Statis PT Kreatif Sky Abadi berhasil dimuat.');
 };
@@ -370,6 +616,11 @@ const saveSettings = async () => {
 
 onMounted(() => {
   fetchSettings();
+  window.addEventListener('paste', handlePaste);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('paste', handlePaste);
 });
 </script>
 

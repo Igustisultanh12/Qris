@@ -68,9 +68,11 @@
 import { ref, onUnmounted, onMounted } from 'vue';
 import jsQR from 'jsqr';
 import { useToastStore } from '../stores/toast';
+import { decodeQrFromFile, cleanQrisPayload } from '../utils/qrDecoder';
 
 const emit = defineEmits<{
   (e: 'scan', data: string): void;
+  (e: 'scan-success', data: string): void;
 }>();
 
 const toast = useToastStore();
@@ -107,10 +109,14 @@ const tick = () => {
     if (ctx) {
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
       const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      const code = jsQR(imageData.data, imageData.width, imageData.height);
+      const code = jsQR(imageData.data, imageData.width, imageData.height, {
+        inversionAttempts: 'attemptBoth',
+      });
 
-      if (code && code.data.startsWith('000201')) {
-        emit('scan', code.data);
+      if (code && code.data && code.data.includes('000201')) {
+        const payload = cleanQrisPayload(code.data);
+        emit('scan', payload);
+        emit('scan-success', payload);
         toast.success('QRIS Berhasil Dipindai!');
         stopCamera();
         return;
@@ -140,31 +146,15 @@ const startCamera = async () => {
   }
 };
 
-const decodeImage = (file: File) => {
-  const reader = new FileReader();
-  reader.onload = () => {
-    const img = new Image();
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      canvas.width = img.width;
-      canvas.height = img.height;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
-
-      ctx.drawImage(img, 0, 0);
-      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      const code = jsQR(imageData.data, canvas.width, canvas.height);
-
-      if (code && code.data) {
-        emit('scan', code.data);
-        toast.success('QRIS Berhasil Didecode!');
-      } else {
-        toast.error('QR Code Tidak Ditemukan', 'Pastikan gambar QR terlihat jelas dan memiliki kontras yang baik.');
-      }
-    };
-    img.src = reader.result as string;
-  };
-  reader.readAsDataURL(file);
+const decodeImage = async (file: File) => {
+  try {
+    const payload = await decodeQrFromFile(file);
+    emit('scan', payload);
+    emit('scan-success', payload);
+    toast.success('QRIS Berhasil Didecode!');
+  } catch (err: any) {
+    toast.error('QR Code Tidak Ditemukan', err.message || 'Pastikan gambar QR terlihat jelas dan memiliki kontras yang baik.');
+  }
 };
 
 const handleFileUpload = (e: Event) => {
