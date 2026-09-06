@@ -110,4 +110,32 @@ class AdminPlanController extends Controller
 
         return ApiResponse::success($plan, 'Subscription plan updated');
     }
+
+    public function show(string $id): JsonResponse
+    {
+        $plan = SubscriptionPlan::findOrFail($id);
+        return ApiResponse::success($plan);
+    }
+
+    public function destroy(string $id): JsonResponse
+    {
+        $plan = SubscriptionPlan::findOrFail($id);
+
+        if ($plan->subscriptions()->where('status', 'active')->exists()) {
+            return ApiResponse::error('Paket tidak dapat dihapus karena sedang aktif digunakan oleh pelanggan.', null, 422);
+        }
+
+        $oldValues = $plan->toArray();
+        $plan->delete();
+
+        AuditLog::record(
+            action: 'plan.deleted',
+            entity: 'SubscriptionPlan',
+            entityId: (string) $plan->id,
+            oldValues: $oldValues
+        );
+
+        return ApiResponse::success(null, 'Paket langganan berhasil dihapus.');
+    }
 }
+

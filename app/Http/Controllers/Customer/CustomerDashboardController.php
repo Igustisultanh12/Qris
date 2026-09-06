@@ -19,7 +19,22 @@ class CustomerDashboardController extends Controller
         $customer = $user->customer;
 
         if (!$customer) {
-            return ApiResponse::error('Customer profile not found for this user', null, 404);
+            return ApiResponse::success([
+                'stats' => [
+                    'total_merchants' => 0,
+                    'max_merchants' => 0,
+                    'total_transactions' => 0,
+                    'generated_qr_count' => 0,
+                    'paid_transactions_count' => 0,
+                    'total_volume' => 0,
+                    'api_calls_count' => 0,
+                    'outstanding_invoices_count' => 0,
+                    'outstanding_invoices_amount' => 0,
+                ],
+                'subscription' => null,
+                'recent_transactions' => [],
+                'chart' => [],
+            ]);
         }
 
         // Metrics

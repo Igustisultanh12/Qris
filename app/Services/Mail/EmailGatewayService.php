@@ -2,6 +2,7 @@
 
 namespace App\Services\Mail;
 
+use App\Mail\OtpVerificationMailable;
 use App\Mail\TestEmailMailable;
 use App\Mail\TransactionReceiptMailable;
 use App\Mail\WelcomeCustomerMailable;
@@ -172,6 +173,21 @@ class EmailGatewayService
             return true;
         } catch (\Throwable $e) {
             Log::warning("Could not send transaction receipt email: {$e->getMessage()}");
+            return false;
+        }
+    }
+
+    /**
+     * Send email verification OTP code.
+     */
+    public function sendOtpEmail(User $user, string $otp): bool
+    {
+        try {
+            $this->applyConfiguration();
+            Mail::to($user->email)->send(new OtpVerificationMailable($user, $otp));
+            return true;
+        } catch (\Throwable $e) {
+            Log::warning("Could not send OTP email to {$user->email}: {$e->getMessage()}");
             return false;
         }
     }

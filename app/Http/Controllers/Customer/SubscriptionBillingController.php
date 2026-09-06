@@ -29,6 +29,10 @@ class SubscriptionBillingController extends Controller
     public function current(Request $request): JsonResponse
     {
         $customer = $request->user()->customer;
+        if (!$customer) {
+            return ApiResponse::success(['subscription' => null]);
+        }
+
         $subscription = $customer->activeSubscription;
 
         return ApiResponse::success([
@@ -48,6 +52,15 @@ class SubscriptionBillingController extends Controller
     public function invoices(Request $request): JsonResponse
     {
         $customer = $request->user()->customer;
+        if (!$customer) {
+            return ApiResponse::success([
+                'data' => [],
+                'current_page' => 1,
+                'last_page' => 1,
+                'total' => 0,
+            ]);
+        }
+
         $invoices = $customer->invoices()
             ->with(['items', 'payments'])
             ->latest()
@@ -59,9 +72,13 @@ class SubscriptionBillingController extends Controller
     public function createInvoice(Request $request): JsonResponse
     {
         $customer = $request->user()->customer;
+        if (!$customer) {
+            return ApiResponse::error('Hanya akun pelanggan yang dapat membuat faktur langganan.', null, 403);
+        }
 
         $validator = Validator::make($request->all(), [
-            'plan_slug' => ['required', 'exists:subscription_plans,slug'],
+            'plan_id' => ['nullable', 'integer', 'exists:subscription_plans,id'],
+            'plan_slug' => ['nullable', 'string', 'exists:subscription_plans,slug'],
             'coupon_code' => ['nullable', 'string'],
         ]);
 
@@ -69,7 +86,16 @@ class SubscriptionBillingController extends Controller
             return ApiResponse::error('Validation failed', $validator->errors(), 422);
         }
 
-        $plan = SubscriptionPlan::where('slug', $request->plan_slug)->firstOrFail();
+        $plan = null;
+        if ($request->filled('plan_id')) {
+            $plan = SubscriptionPlan::find($request->plan_id);
+        } elseif ($request->filled('plan_slug')) {
+            $plan = SubscriptionPlan::where('slug', $request->plan_slug)->first();
+        }
+
+        if (!$plan) {
+            return ApiResponse::error('Paket langganan harus dipilih.', null, 422);
+        }
 
         $coupon = null;
         if ($code = $request->coupon_code) {
@@ -90,6 +116,10 @@ class SubscriptionBillingController extends Controller
     public function pay(Request $request, string $id): JsonResponse
     {
         $customer = $request->user()->customer;
+        if (!$customer) {
+            return ApiResponse::error('Hanya akun pelanggan yang dapat melakukan pembayaran.', null, 403);
+        }
+
         $invoice = $customer->invoices()->where(fn ($q) => $q->where('uuid', $id)->orWhere('id', $id))->firstOrFail();
 
         if ($invoice->status === 'paid') {

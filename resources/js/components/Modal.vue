@@ -8,7 +8,7 @@
       leave-from-class="opacity-100"
       leave-to-class="opacity-0"
     >
-      <div v-if="show" class="fixed inset-0 z-50 overflow-y-auto">
+      <div v-if="isVisible" class="fixed inset-0 z-50 overflow-y-auto">
         <!-- Backdrop -->
         <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" @click="$emit('close')"></div>
 
@@ -22,8 +22,11 @@
             leave-to-class="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
           >
             <div
-              v-if="show"
-              class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-slate-900 text-left shadow-2xl transition-all w-full max-w-xl border border-slate-200 dark:border-slate-800"
+              v-if="isVisible"
+              :class="[
+                'relative transform overflow-hidden rounded-2xl bg-white dark:bg-slate-900 text-left shadow-2xl transition-all w-full border border-slate-200 dark:border-slate-800',
+                maxWidth || 'max-w-xl'
+              ]"
             >
               <!-- Header -->
               <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-800">
@@ -51,10 +54,23 @@
 </template>
 
 <script setup lang="ts">
-defineProps<{
-  show: boolean;
-  title: string;
-}>();
+import { computed } from 'vue';
+
+const props = withDefaults(
+  defineProps<{
+    show?: boolean;
+    isOpen?: boolean;
+    title: string;
+    maxWidth?: string;
+  }>(),
+  {
+    show: false,
+    isOpen: false,
+    maxWidth: 'max-w-xl',
+  }
+);
+
+const isVisible = computed(() => props.isOpen || props.show);
 
 defineEmits<{
   (e: 'close'): void;

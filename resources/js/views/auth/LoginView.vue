@@ -182,6 +182,12 @@ const handleLogin = async () => {
     const res = await api.post('/auth/login', form);
     const data = res.data.data;
 
+    if (data.otp_required) {
+      toast.warning('Verifikasi Diperlukan', 'Email Anda belum diverifikasi. Kode OTP telah dikirimkan ke email Anda.');
+      router.push({ path: '/register', query: { email: data.email, step: 'otp' } });
+      return;
+    }
+
     if (data.two_factor_required) {
       twoFactorRequired.value = true;
       tempToken.value = data.temp_token;

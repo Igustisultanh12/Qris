@@ -153,11 +153,11 @@
               :key="msg.id"
               :class="[
                 'p-3 rounded-xl text-xs space-y-1',
-                msg.is_admin ? 'bg-primary-50 dark:bg-primary-950/40 ml-6 border border-primary-100 dark:border-primary-800' : 'bg-slate-100 dark:bg-slate-800 mr-6'
+                (msg.is_admin_reply || msg.is_admin) ? 'bg-primary-50 dark:bg-primary-950/40 ml-6 border border-primary-100 dark:border-primary-800' : 'bg-slate-100 dark:bg-slate-800 mr-6'
               ]"
             >
               <div class="flex justify-between font-bold">
-                <span>{{ msg.is_admin ? 'Tim Support PT Kreatif Sky Abadi' : 'Anda' }}</span>
+                <span>{{ (msg.is_admin_reply || msg.is_admin) ? 'Tim Support PT Kreatif Sky Abadi' : 'Anda' }}</span>
                 <span class="text-[10px] text-slate-400">{{ formatDate(msg.created_at) }}</span>
               </div>
               <p class="text-slate-700 dark:text-slate-300">{{ msg.message }}</p>
@@ -269,7 +269,12 @@ const sendReply = async () => {
     const res = await api.post(`/tickets/${activeTicket.value.id}/reply`, {
       message: replyText.value,
     });
-    activeTicket.value.messages = res.data.data?.messages || activeTicket.value.messages;
+    if (res.data.data) {
+      if (!activeTicket.value.messages) {
+        activeTicket.value.messages = [];
+      }
+      activeTicket.value.messages.push(res.data.data);
+    }
     replyText.value = '';
     toast.success('Balasan Terkirim', 'Pesan balasan Anda telah diteruskan ke tim bantuan.');
   } catch (err: any) {

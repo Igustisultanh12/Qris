@@ -253,14 +253,126 @@
 
       </div>
 
+      <!-- Popup Modal: Anda belum berlangganan, silakan pilih paket sesuai kebutuhan Anda -->
+      <Modal
+        :is-open="showNoSubscriptionModal"
+        title="Anda Belum Berlangganan, Silakan Pilih Paket Sesuai Kebutuhan Anda"
+        max-width="max-w-4xl"
+        @close="showNoSubscriptionModal = false"
+      >
+        <div class="space-y-6">
+          <div class="p-4 rounded-xl bg-primary-50 dark:bg-primary-950/40 border border-primary-200 dark:border-primary-800 text-xs text-primary-900 dark:text-primary-200 flex items-start gap-3">
+            <Sparkles class="w-5 h-5 text-primary-600 shrink-0 mt-0.5" />
+            <div>
+              <strong class="font-bold text-sm block mb-1">Selamat Datang di Qmis (PT Kreatif Sky Abadi)!</strong>
+              Akun Anda saat ini belum memiliki paket langganan aktif. Silakan pilih salah satu paket SaaS berikut untuk langsung mengaktifkan kuota konversi QRIS statis ke dinamis dan integrasi API kasir POS Anda.
+            </div>
+          </div>
+
+          <div v-if="loadingPlans" class="py-12 flex justify-center text-slate-400">
+            <Loader2 class="w-8 h-8 animate-spin" />
+          </div>
+
+          <div v-else class="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <div
+              v-for="plan in availablePlans"
+              :key="plan.id"
+              :class="[
+                'rounded-2xl border-2 p-5 flex flex-col justify-between transition-all relative',
+                plan.slug === 'pro'
+                  ? 'border-primary-600 bg-primary-50/20 dark:bg-primary-950/20 shadow-md shadow-primary-600/10'
+                  : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900'
+              ]"
+            >
+              <div v-if="plan.slug === 'pro'" class="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-primary-600 text-white text-[10px] font-black uppercase tracking-wider">
+                PALING POPULER
+              </div>
+
+              <div>
+                <div class="flex items-center justify-between mb-2">
+                  <h4 class="text-lg font-bold text-slate-900 dark:text-white">{{ plan.name }}</h4>
+                </div>
+
+                <div class="text-2xl font-black text-slate-900 dark:text-white mt-1">
+                  {{ formatRupiah(plan.price) }}
+                  <span class="text-xs font-normal text-slate-500">/ bulan</span>
+                </div>
+
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-2 min-h-[36px]">
+                  {{ plan.description || 'Solusi konversi QRIS dinamis untuk bisnis Anda.' }}
+                </p>
+
+                <div class="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 space-y-2 text-xs text-slate-600 dark:text-slate-300">
+                  <div class="flex items-center gap-2">
+                    <CheckCircle class="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                    <span>Maks. <strong>{{ plan.max_merchants }} Sub-Merchant</strong></span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <CheckCircle class="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                    <span>Rate limit <strong>{{ plan.rate_limit_rpm || 60 }} req/menit</strong></span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <CheckCircle class="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                    <span>Konversi QRIS Dinamis (EMVCo Tag 01=12)</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <CheckCircle class="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                    <span>Dukungan Webhook & Notifikasi Pembayaran</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <CheckCircle class="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                    <span>REST API & Integrasi Aplikasi POS</span>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                @click="selectPlanFromPopup(plan)"
+                :disabled="selectingPlanId === plan.id"
+                :class="[
+                  'mt-6 w-full py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-md',
+                  plan.slug === 'pro'
+                    ? 'bg-primary-600 hover:bg-primary-700 text-white shadow-primary-600/20'
+                    : 'bg-slate-900 hover:bg-slate-800 text-white dark:bg-slate-800 dark:hover:bg-slate-700'
+                ]"
+              >
+                <Loader2 v-if="selectingPlanId === plan.id" class="w-3.5 h-3.5 animate-spin" />
+                <span>{{ selectingPlanId === plan.id ? 'Memproses Faktur...' : 'Pilih Paket Ini' }}</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800 text-xs">
+            <router-link
+              to="/customer/billing"
+              class="text-primary-600 dark:text-primary-400 font-semibold hover:underline"
+              @click="showNoSubscriptionModal = false"
+            >
+              Lihat Rincian Lengkap di Menu Tagihan &rarr;
+            </router-link>
+
+            <button
+              type="button"
+              @click="showNoSubscriptionModal = false"
+              class="px-4 py-2 text-slate-500 hover:text-slate-800 dark:hover:text-white"
+            >
+              Nanti Saja (Jelajahi Dashboard)
+            </button>
+          </div>
+        </div>
+      </Modal>
+
     </div>
   </DashboardLayout>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import DashboardLayout from '../../layouts/DashboardLayout.vue';
+import Modal from '../../components/Modal.vue';
 import api from '../../api/client';
+import { useToastStore } from '../../stores/toast';
 import {
   Banknote,
   ArrowLeftRight,
@@ -273,20 +385,64 @@ import {
   BellRing,
   FileText,
   ChevronRight,
+  Sparkles,
+  CheckCircle,
 } from 'lucide-vue-next';
+
+const router = useRouter();
+const toast = useToastStore();
 
 const loading = ref(true);
 const dashboardData = ref<any>(null);
+const showNoSubscriptionModal = ref(false);
+const availablePlans = ref<any[]>([]);
+const loadingPlans = ref(false);
+const selectingPlanId = ref<number | null>(null);
+
+const fetchPlans = async () => {
+  loadingPlans.value = true;
+  try {
+    const res = await api.get('/plans');
+    availablePlans.value = res.data.data || [];
+  } catch (err) {
+    console.error('Failed to load plans:', err);
+  } finally {
+    loadingPlans.value = false;
+  }
+};
 
 const fetchDashboard = async () => {
   loading.value = true;
   try {
     const res = await api.get('/customer/dashboard');
     dashboardData.value = res.data.data;
+
+    // Check if customer has active paid subscription
+    const sub = dashboardData.value?.subscription;
+    const hasActiveSub = sub && (sub.status === 'active' || sub.status === 'trial') && sub.plan_name;
+
+    if (!hasActiveSub) {
+      await fetchPlans();
+      showNoSubscriptionModal.value = true;
+    }
   } catch (err) {
     console.error('Failed to load dashboard:', err);
   } finally {
     loading.value = false;
+  }
+};
+
+const selectPlanFromPopup = async (plan: any) => {
+  selectingPlanId.value = plan.id;
+  try {
+    await api.post('/customer/billing/invoices/create', { plan_id: plan.id });
+    toast.success('Paket Dipilih!', `Faktur langganan untuk ${plan.name} berhasil dibuat. Silakan lakukan pembayaran.`);
+    showNoSubscriptionModal.value = false;
+    router.push('/customer/billing');
+  } catch (err: any) {
+    toast.error('Gagal Memilih Paket', err.response?.data?.message || 'Terjadi kesalahan.');
+  } finally {
+    selectingPlanId.value = null;
   }
 };
 

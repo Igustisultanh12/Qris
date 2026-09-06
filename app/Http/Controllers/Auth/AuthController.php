@@ -66,8 +66,8 @@ class AuthController extends Controller
             'email' => $validated['email'],
             'phone' => $validated['phone'] ?? null,
             'password' => Hash::make($validated['password']),
-            'email_verified_at' => now(), // instant verification for demo
-            'status' => 'active',
+            'email_verified_at' => null, // OTP verification required
+            'status' => 'pending',
         ]);
 
         $customerRole = Role::where('slug', 'customer')->first();
@@ -75,24 +75,9 @@ class AuthController extends Controller
             $user->roles()->attach($customerRole->id);
         }
 
-        // 3. Create 14-day trial on Basic plan
-        $basicPlan = SubscriptionPlan::where('slug', 'basic')->first();
-        if ($basicPlan) {
-            Subscription::create([
-                'customer_id' => $customer->id,
-                'plan_id' => $basicPlan->id,
-                'status' => 'trial',
-                'price' => $basicPlan->price,
-                'currency' => 'IDR',
-                'starts_at' => now(),
-                'ends_at' => now()->addDays(14),
-                'trial_ends_at' => now()->addDays(14),
-                'auto_renew' => true,
-            ]);
-        }
-
-        // Create Sanctum Token
-        $token = $user->createToken('auth-token')->plainTextToken;
+        // Generate 6-digit OTP
+        $otp = sprintf('%06d', random_int(100000, 999999));
+        cache()->put("email_otp_{$user->email}", $otp, now()->addMinutes(15));
 
         AuditLog::record(
             action: 'user.registered',
@@ -101,12 +86,77 @@ class AuthController extends Controller
             newValues: ['email' => $user->email, 'customer_id' => $customer->id]
         );
 
-        // Dispatch welcome email via Email Gateway
+        // Dispatch Welcome & OTP emails via Email Gateway
         try {
             app(\App\Services\Mail\EmailGatewayService::class)->sendWelcomeEmail($user, $customer);
+            app(\App\Services\Mail\EmailGatewayService::class)->sendOtpEmail($user, $otp);
         } catch (\Throwable $e) {
             // Non-blocking
         }
+
+        return ApiResponse::success([
+            'email' => $user->email,
+            'otp_required' => true,
+        ], 'Pendaftaran berhasil. Silakan masukkan 6-digit kode OTP yang telah dikirim ke email Anda.', [], 201);
+    }
+
+    /**
+     * Verify email OTP code.
+     */
+    public function verifyOtp(Request $request): JsonResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => ['required', 'string', 'email'],
+            'otp' => ['required', 'string', 'min:6', 'max:6'],
+        ]);
+
+        if ($validator->fails()) {
+            return ApiResponse::error('Validation failed', $validator->errors(), 422);
+        }
+
+        $user = User::where('email', $request->email)->first();
+        if (!$user) {
+            return ApiResponse::error('Akun pengguna tidak ditemukan.', null, 404);
+        }
+
+        $cachedOtp = cache()->get("email_otp_{$user->email}");
+
+        // Accept cached OTP or master test OTP in local/debug environment
+        $isValidOtp = ($cachedOtp && $cachedOtp === $request->otp)
+            || (config('app.env') === 'local' && $request->otp === '123456');
+
+        if (!$isValidOtp) {
+            return ApiResponse::error('Kode OTP tidak valid atau telah kadaluarsa. Silakan minta kode baru.', null, 422);
+        }
+
+        // Mark verified & activate user
+        $user->email_verified_at = now();
+        $user->status = 'active';
+        $user->save();
+
+        cache()->forget("email_otp_{$user->email}");
+
+        $customer = $user->customer;
+        if ($customer && $customer->status === 'pending') {
+            $customer->update(['status' => 'active']);
+        }
+
+        AuditLog::record(
+            action: 'user.email_verified',
+            entity: 'User',
+            entityId: (string) $user->id,
+            newValues: ['email' => $user->email, 'verified_at' => now()->toDateTimeString()]
+        );
+
+        // Send welcome email after verification
+        try {
+            if ($customer) {
+                app(\App\Services\Mail\EmailGatewayService::class)->sendWelcomeEmail($user, $customer);
+            }
+        } catch (\Throwable $e) {}
+
+        // Issue token
+        $token = $user->createToken('auth-token')->plainTextToken;
 
         return ApiResponse::success([
             'token' => $token,
@@ -114,14 +164,48 @@ class AuthController extends Controller
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
-                'role' => 'customer',
-                'customer' => [
+                'role' => $user->roles()->first()?->slug ?? 'customer',
+                'customer' => $customer ? [
                     'id' => $customer->id,
                     'uuid' => $customer->uuid,
                     'business_name' => $customer->business_name,
-                ],
+                ] : null,
             ],
-        ], 'Registration successful', [], 201);
+        ], 'Verifikasi email berhasil! Selamat datang di Qmis.');
+    }
+
+    /**
+     * Resend email OTP code.
+     */
+    public function resendOtp(Request $request): JsonResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => ['required', 'string', 'email'],
+        ]);
+
+        if ($validator->fails()) {
+            return ApiResponse::error('Validation failed', $validator->errors(), 422);
+        }
+
+        $user = User::where('email', $request->email)->first();
+        if (!$user) {
+            return ApiResponse::error('Akun pengguna tidak ditemukan.', null, 404);
+        }
+
+        if ($user->email_verified_at !== null) {
+            return ApiResponse::error('Akun email ini sudah terverifikasi. Silakan langsung login.', null, 400);
+        }
+
+        $otp = sprintf('%06d', random_int(100000, 999999));
+        cache()->put("email_otp_{$user->email}", $otp, now()->addMinutes(15));
+
+        try {
+            app(\App\Services\Mail\EmailGatewayService::class)->sendOtpEmail($user, $otp);
+        } catch (\Throwable $e) {}
+
+        return ApiResponse::success([
+            'email' => $user->email,
+        ], 'Kode OTP baru telah berhasil dikirim ke email Anda.');
     }
 
     /**
@@ -142,6 +226,19 @@ class AuthController extends Controller
 
         if (!$user || !Hash::check($request->password, $user->password)) {
             return ApiResponse::error('Invalid email or password', null, 401);
+        }
+
+        if ($user->email_verified_at === null) {
+            $otp = sprintf('%06d', random_int(100000, 999999));
+            cache()->put("email_otp_{$user->email}", $otp, now()->addMinutes(15));
+            try {
+                app(\App\Services\Mail\EmailGatewayService::class)->sendOtpEmail($user, $otp);
+            } catch (\Throwable $e) {}
+
+            return ApiResponse::success([
+                'otp_required' => true,
+                'email' => $user->email,
+            ], 'Akun Anda belum diverifikasi. Kode OTP baru telah dikirimkan ke email Anda.');
         }
 
         if ($user->status !== 'active') {

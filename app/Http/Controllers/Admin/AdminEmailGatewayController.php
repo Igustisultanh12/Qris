@@ -66,6 +66,11 @@ class AdminEmailGatewayController extends Controller
             return ApiResponse::error('Validation failed', $validator->errors(), 422);
         }
 
+        $config = $this->emailGateway->getConfig();
+        if ($config['mailer'] === 'smtp' && empty($config['password_set']) && !empty($config['username'])) {
+            return ApiResponse::error('Password SMTP belum dikonfigurasi. Silakan simpan kredensial SMTP terlebih dahulu.', null, 422);
+        }
+
         $result = $this->emailGateway->sendTestEmail($request->input('recipient_email'));
 
         AuditLog::record(
@@ -78,7 +83,7 @@ class AdminEmailGatewayController extends Controller
         );
 
         if (!$result['success']) {
-            return ApiResponse::error($result['message'], $result, 500);
+            return ApiResponse::error($result['message'], $result, 422);
         }
 
         return ApiResponse::success($result, $result['message']);

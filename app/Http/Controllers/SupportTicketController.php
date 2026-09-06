@@ -69,7 +69,11 @@ class SupportTicketController extends Controller
             $query->where('customer_id', $user->customer_id);
         }
 
-        $ticket = $query->where(fn ($q) => $q->where('uuid', $id)->orWhere('ticket_number', $id))->firstOrFail();
+        $ticket = $query->where(function ($q) use ($id) {
+            $q->where('id', $id)
+              ->orWhere('uuid', $id)
+              ->orWhere('ticket_number', $id);
+        })->firstOrFail();
         return ApiResponse::success($ticket);
     }
 
@@ -81,7 +85,11 @@ class SupportTicketController extends Controller
             $query->where('customer_id', $user->customer_id);
         }
 
-        $ticket = $query->where(fn ($q) => $q->where('uuid', $id)->orWhere('ticket_number', $id))->firstOrFail();
+        $ticket = $query->where(function ($q) use ($id) {
+            $q->where('id', $id)
+              ->orWhere('uuid', $id)
+              ->orWhere('ticket_number', $id);
+        })->firstOrFail();
 
         $validator = Validator::make($request->all(), [
             'message' => ['required', 'string'],
@@ -105,6 +113,6 @@ class SupportTicketController extends Controller
             $ticket->update(['status' => 'open']);
         }
 
-        return ApiResponse::success($message, 'Reply added successfully');
+        return ApiResponse::success($message->load('user'), 'Reply added successfully');
     }
 }

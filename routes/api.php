@@ -35,6 +35,8 @@ use Illuminate\Support\Facades\Route;
 // ==========================================
 Route::prefix('auth')->middleware(['assign.request.id'])->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/verify-otp', [AuthController::class, 'verifyOtp']);
+    Route::post('/resend-otp', [AuthController::class, 'resendOtp']);
     Route::post('/login', [AuthController::class, 'login']);
     Route::post('/verify-2fa', [AuthController::class, 'verifyTwoFactor']);
 
