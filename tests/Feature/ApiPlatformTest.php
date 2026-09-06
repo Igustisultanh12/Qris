@@ -283,4 +283,30 @@ class ApiPlatformTest extends TestCase
             'status' => 'paid',
         ]);
     }
+
+    public function test_mutation_webhook_automatically_marks_invoice_paid(): void
+    {
+        $invoice = \App\Models\Invoice::create([
+            'customer_id' => $this->customerA->id,
+            'invoice_number' => 'INV-TEST-MUT-01',
+            'subtotal' => 25000,
+            'tax' => 2750,
+            'total' => 27750,
+            'status' => 'pending',
+            'due_date' => now()->addDays(7),
+        ]);
+
+        $response = $this->postJson('/api/v1/billing/callbacks/mutation', [
+            'amount' => 27750,
+            'description' => 'QRIS TRANSFER 27750 TOKO ANANDA',
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJsonPath('success', true);
+
+        $this->assertDatabaseHas('invoices', [
+            'id' => $invoice->id,
+            'status' => 'paid',
+        ]);
+    }
 }

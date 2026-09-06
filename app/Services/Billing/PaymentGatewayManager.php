@@ -6,6 +6,7 @@ use App\Contracts\PaymentGatewayInterface;
 use App\Models\Setting;
 use App\Services\Billing\Gateways\ManualTransferGateway;
 use App\Services\Billing\Gateways\MidtransGateway;
+use App\Services\Billing\Gateways\MutationGateway;
 use App\Services\Billing\Gateways\TripayGateway;
 use App\Services\Billing\Gateways\XenditGateway;
 use InvalidArgumentException;
@@ -24,6 +25,8 @@ class PaymentGatewayManager
             'midtrans' => new MidtransGateway(),
             'xendit' => new XenditGateway(),
             'tripay' => new TripayGateway(),
+            'mutation' => new MutationGateway(),
+            'qris_mutation' => new MutationGateway(),
         ];
     }
 

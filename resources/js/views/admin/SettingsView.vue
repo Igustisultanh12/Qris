@@ -287,6 +287,33 @@
             </div>
           </div>
 
+          <!-- Automatic Mutation Webhook URL Info -->
+          <div class="p-4 rounded-xl border border-indigo-900/60 bg-indigo-950/20 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-indigo-300">URL Webhook Notifikasi Mutasi Pembayaran Otomatis:</span>
+              <span class="text-[10px] px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-400 font-mono">POST Callback</span>
+            </div>
+            <p class="text-[11px] text-slate-400">
+              Gunakan URL ini di layanan mutasi otomatis Anda (seperti Cekmutasi.com, Moota.co, atau aplikasi Webhook Forwarder Notifikasi Android). Ketika pembeli scan QRIS dan uang masuk terdeteksi, sistem otomatis mencocokkan nominal dan melunasi faktur tanpa campur tangan manual.
+            </p>
+            <div class="flex items-center gap-2">
+              <input
+                type="text"
+                readonly
+                :value="mutationWebhookUrl"
+                class="w-full px-3 py-1.5 rounded-lg border border-slate-800 bg-slate-900 text-indigo-300 font-mono text-xs outline-none select-all"
+              />
+              <button
+                type="button"
+                @click="copyMutationUrl"
+                class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white shrink-0 flex items-center gap-1"
+              >
+                <Copy class="w-3.5 h-3.5" />
+                <span>Salin URL</span>
+              </button>
+            </div>
+          </div>
+
           <!-- Status Aktif Toggle -->
           <div class="flex items-center justify-between pt-2">
             <div>
@@ -397,7 +424,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, onUnmounted } from 'vue';
+import { ref, reactive, computed, onMounted, onUnmounted } from 'vue';
 import AdminLayout from '../../layouts/AdminLayout.vue';
 import api from '../../api/client';
 import { useToastStore } from '../../stores/toast';
@@ -562,6 +589,15 @@ const clearPayload = () => {
   previewResult.value = null;
   clearUploadedImage();
   toast.info('Dibersihkan', 'Payload QRIS telah dikosongkan.');
+};
+
+const mutationWebhookUrl = computed(() => {
+  return `${window.location.origin}/api/v1/billing/callbacks/mutation`;
+});
+
+const copyMutationUrl = () => {
+  navigator.clipboard.writeText(mutationWebhookUrl.value);
+  toast.success('Disalin', 'URL Webhook mutasi berhasil disalin ke clipboard.');
 };
 
 const loadDefaultPlatformQris = () => {

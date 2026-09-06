@@ -126,7 +126,7 @@
       </div>
 
       <!-- Pay Invoice Modal (DYNAMIC QRIS FROM PLATFORM STATIC) -->
-      <Modal :is-open="showPayModal" title="Pembayaran QRIS Dinamis Platform" max-width="max-w-lg" @close="showPayModal = false">
+      <Modal :is-open="showPayModal" title="Pembayaran QRIS Dinamis Platform" max-width="max-w-lg" @close="closePayModal">
         <div v-if="selectedInvoice" class="space-y-4">
           <!-- Summary Header -->
           <div class="p-4 bg-slate-50 dark:bg-slate-800/80 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 flex items-center justify-between">
@@ -150,8 +150,33 @@
             <span class="text-xs">Mengonversi QRIS Statis Platform ke Dinamis...</span>
           </div>
 
+          <!-- Payment Success Celebration State (Auto-detected or simulated) -->
+          <div v-if="paymentDetected" class="py-10 text-center space-y-4 bg-emerald-950/20 rounded-2xl border border-emerald-500/30 p-6">
+            <div class="w-16 h-16 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto animate-bounce">
+              <CheckCircle class="w-10 h-10" />
+            </div>
+            <div>
+              <h3 class="text-lg font-bold text-white">Pembayaran Berhasil Dikonfirmasi!</h3>
+              <p class="text-xs text-slate-300 mt-1 max-w-sm mx-auto">
+                Sistem telah mendeteksi dana masuk. Faktur telah lunas dan paket langganan Anda telah aktif seketika.
+              </p>
+            </div>
+            <div class="text-[11px] text-emerald-400 font-medium">
+              Menutup modal dan memperbarui status akun...
+            </div>
+          </div>
+
           <!-- QRIS Display Card -->
           <div v-else-if="qrisInfo" class="space-y-4">
+            <!-- Realtime Auto-Detection Pulse Indicator -->
+            <div class="flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-medium">
+              <span class="relative flex h-2 w-2">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              </span>
+              <span>Menunggu pembayaran... Sistem otomatis mendeteksi transaksi secara realtime.</span>
+            </div>
+
             <div class="bg-white dark:bg-slate-900 rounded-2xl border-2 border-indigo-500/30 p-5 flex flex-col items-center text-center shadow-lg relative">
               <div class="w-full flex items-center justify-between pb-3 mb-2 border-b border-slate-100 dark:border-slate-800">
                 <div class="flex items-center gap-2">
@@ -207,20 +232,23 @@
               </button>
             </div>
 
-            <!-- Simulation button -->
-            <div class="pt-2">
+            <!-- Developer / Testing Simulation Option -->
+            <div class="pt-2 border-t border-slate-200/60 dark:border-slate-800">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-[11px] text-slate-500">Mode Pengujian / Simulasi Tanpa Transfer:</span>
+              </div>
               <button
                 type="button"
                 @click="simulatePayment"
                 :disabled="paying"
-                class="w-full py-3 px-4 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-600/20 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                class="w-full py-2.5 px-4 rounded-xl text-xs font-bold text-white bg-slate-800 hover:bg-slate-700 border border-slate-700 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
               >
                 <Loader2 v-if="paying" class="w-4 h-4 animate-spin" />
-                <CheckCircle v-else class="w-4 h-4" />
-                <span>{{ paying ? 'Memverifikasi Pembayaran...' : 'Simulasikan Pembayaran Lunas (PAID)' }}</span>
+                <CheckCircle v-else class="w-4 h-4 text-emerald-400" />
+                <span>{{ paying ? 'Memverifikasi...' : 'Simulasikan Pembayaran Lunas (Dev Mode)' }}</span>
               </button>
-              <p class="text-[11px] text-center text-slate-400 mt-2">
-                Klik tombol di atas untuk simulasi pelunasan langsung dan aktivasi paket seketika.
+              <p class="text-[10px] text-center text-slate-500 mt-1.5">
+                Di lingkungan live, sistem otomatis mendeteksi mutasi uang masuk dari bank/e-wallet tanpa perlu klik tombol.
               </p>
             </div>
           </div>
@@ -275,7 +303,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import DashboardLayout from '../../layouts/DashboardLayout.vue';
 import Modal from '../../components/Modal.vue';
 import api from '../../api/client';
@@ -305,6 +333,47 @@ const qrisInfo = ref<any>(null);
 const loadingQris = ref(false);
 const paying = ref(false);
 const copied = ref(false);
+const paymentDetected = ref(false);
+let pollTimer: any = null;
+
+const startPolling = (invId: string | number) => {
+  stopPolling();
+  pollTimer = setInterval(async () => {
+    if (!showPayModal.value) {
+      stopPolling();
+      return;
+    }
+    try {
+      const res = await api.get(`/customer/billing/invoices/${invId}/qris`);
+      if (res.data.data?.is_paid || res.data.data?.invoice?.status === 'paid') {
+        stopPolling();
+        paymentDetected.value = true;
+        toast.success('Pembayaran Terdeteksi!', 'Faktur telah lunas dan paket langganan Anda telah aktif otomatis!');
+        await authStore.fetchUser();
+        await fetchBilling();
+        setTimeout(() => {
+          showPayModal.value = false;
+          paymentDetected.value = false;
+        }, 2500);
+      }
+    } catch {
+      // ignore transient poll error
+    }
+  }, 3000);
+};
+
+const stopPolling = () => {
+  if (pollTimer) {
+    clearInterval(pollTimer);
+    pollTimer = null;
+  }
+};
+
+const closePayModal = () => {
+  stopPolling();
+  showPayModal.value = false;
+  paymentDetected.value = false;
+};
 
 const fetchBilling = async () => {
   loadingInvoices.value = true;
@@ -332,11 +401,15 @@ const openPayModal = async (inv: any) => {
   showPayModal.value = true;
   loadingQris.value = true;
   qrisInfo.value = null;
+  paymentDetected.value = false;
 
   try {
     const invId = inv.uuid || inv.id;
     const res = await api.get(`/customer/billing/invoices/${invId}/qris`);
     qrisInfo.value = res.data.data;
+
+    // Start background auto-detection polling
+    startPolling(invId);
   } catch (err: any) {
     toast.error('Gagal Memuat QRIS', err.response?.data?.message || 'Terjadi kesalahan saat memuat QRIS dinamis.');
   } finally {
@@ -364,13 +437,18 @@ const simulatePayment = async () => {
   try {
     const invId = selectedInvoice.value.uuid || selectedInvoice.value.id;
     const res = await api.post(`/customer/billing/invoices/${invId}/simulate-paid`);
+    stopPolling();
+    paymentDetected.value = true;
     toast.success('Pembayaran Lunas!', res.data.message || 'Paket langganan Anda telah aktif!');
     
     // Refresh user state so auth store immediately reflects the active subscription
     await authStore.fetchUser();
-    
-    showPayModal.value = false;
     await fetchBilling();
+    
+    setTimeout(() => {
+      showPayModal.value = false;
+      paymentDetected.value = false;
+    }, 2500);
   } catch (err: any) {
     toast.error('Gagal Memproses Pembayaran', err.response?.data?.message || 'Terjadi kesalahan.');
   } finally {
@@ -391,7 +469,7 @@ const selectPlanUpgrade = async (planId: number) => {
       openPayModal(createdInvoice);
     }
   } catch (err: any) {
-    toast.error('Gagal Memilih Paket', err.response?.data?.message || 'Terjadi kesalahan.');
+    toast.error('Gagal Membuat Faktur', err.response?.data?.message || 'Terjadi kesalahan.');
   }
 };
 
@@ -399,27 +477,29 @@ const formatRupiah = (val: number) => {
   return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(val || 0);
 };
 
-const formatDate = (dateStr: string) => {
-  if (!dateStr) return '-';
-  const d = new Date(dateStr);
-  return d.toLocaleString('id-ID', { dateStyle: 'medium' });
+const formatDate = (val: string) => {
+  if (!val) return '-';
+  return new Date(val).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
 };
 
 const getStatusBadge = (status: string) => {
   switch (status) {
     case 'paid':
-      return 'px-2 py-0.5 rounded-md text-xs font-semibold bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400';
+      return 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-400';
     case 'pending':
-      return 'px-2 py-0.5 rounded-md text-xs font-semibold bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300';
+      return 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-400';
     case 'overdue':
-      return 'px-2 py-0.5 rounded-md text-xs font-semibold bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-400';
+      return 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-400';
     default:
-      return 'px-2 py-0.5 rounded-md text-xs font-semibold bg-slate-100 text-slate-600';
+      return 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-400';
   }
 };
 
 onMounted(() => {
   fetchBilling();
 });
-</script>
 
+onUnmounted(() => {
+  stopPolling();
+});
+</script>
